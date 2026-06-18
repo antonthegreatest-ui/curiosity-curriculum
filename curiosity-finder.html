@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Curiosity Finder</title>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;700;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1a2e;
+    --paper: #faf8f4;
+    --warm: #f5f0e8;
+    --accent: #ff6b35;
+    --accent2: #4ecdc4;
+    --accent3: #ffe66d;
+    --muted: #8a8a9a;
+    --card-bg: #ffffff;
+    --radius: 20px;
+    --radius-sm: 12px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Background blobs */
+  body::before {
+    content: '';
+    position: fixed;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(78,205,196,0.12) 0%, transparent 70%);
+    top: -200px; right: -200px;
+    pointer-events: none; z-index: 0;
+  }
+  body::after {
+    content: '';
+    position: fixed;
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, rgba(255,107,53,0.10) 0%, transparent 70%);
+    bottom: -150px; left: -150px;
+    pointer-events: none; z-index: 0;
+  }
+
+  .container {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+    position: relative; z-index: 1;
+  }
+
+  /* Header */
+  .site-header {
+    text-align: center;
+    margin-bottom: 48px;
+    animation: fadeDown 0.6s ease both;
+  }
+  .logo-mark {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--ink);
+    color: var(--paper);
+    padding: 8px 18px;
+    border-radius: 100px;
+    font-family: 'Unbounded', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 32px;
+  }
+  .logo-dot {
+    width: 8px; height: 8px;
+    background: var(--accent);
+    border-radius: 50%;
+    display: inline-block;
+  }
+
+  /* Screens */
+  .screen { display: none; }
+  .screen.active { display: block; animation: fadeUp 0.5s ease both; }
+
+  /* Welcome screen */
+  .welcome-headline {
+    font-family: 'Unbounded', sans-serif;
+    font-size: clamp(32px, 6vw, 52px);
+    font-weight: 900;
+    line-height: 1.1;
+    margin-bottom: 20px;
+    letter-spacing: -0.02em;
+  }
+  .welcome-headline .highlight {
+    color: var(--accent);
+    position: relative;
+    display: inline-block;
+  }
+  .welcome-headline .highlight::after {
+    content: '';
+    position: absolute;
+    bottom: 4px; left: 0; right: 0;
+    height: 6px;
+    background: var(--accent3);
+    z-index: -1;
+    border-radius: 3px;
+  }
+  .welcome-sub {
+    font-size: 18px;
+    color: #555;
+    line-height: 1.6;
+    margin-bottom: 40px;
+    max-width: 520px;
+  }
+
+  /* Path cards */
+  .path-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-bottom: 32px;
+  }
+  .path-card {
+    background: var(--card-bg);
+    border: 2px solid transparent;
+    border-radius: var(--radius);
+    padding: 22px 26px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  }
+  .path-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(255,107,53,0.15);
+  }
+  .path-icon {
+    font-size: 32px;
+    flex-shrink: 0;
+    width: 52px;
+    height: 52px;
+    background: var(--warm);
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .path-text strong {
+    display: block;
+    font-family: 'Unbounded', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 4px;
+    letter-spacing: -0.01em;
+  }
+  .path-text span {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.4;
+  }
+
+  /* Quiz screen */
+  .progress-bar-wrap {
+    background: var(--warm);
+    border-radius: 100px;
+    height: 6px;
+    margin-bottom: 36px;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 100px;
+    transition: width 0.4s ease;
+  }
+  .question-counter {
+    font-size: 12px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 12px;
+    font-weight: 500;
+  }
+  .question-text {
+    font-family: 'Unbounded', sans-serif;
+    font-size: clamp(20px, 4vw, 28px);
+    font-weight: 700;
+    line-height: 1.25;
+    margin-bottom: 32px;
+    letter-spacing: -0.02em;
+  }
+  .options-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .option-btn {
+    background: var(--card-bg);
+    border: 2px solid #e8e8e8;
+    border-radius: var(--radius);
+    padding: 20px 16px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: left;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--ink);
+  }
+  .option-btn:hover {
+    border-color: var(--accent2);
+    background: rgba(78,205,196,0.05);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(78,205,196,0.15);
+  }
+  .option-btn.selected {
+    border-color: var(--accent);
+    background: rgba(255,107,53,0.06);
+  }
+  .option-emoji {
+    font-size: 28px;
+    display: block;
+    margin-bottom: 10px;
+  }
+  .option-label {
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.4;
+  }
+
+  /* Known interest screen */
+  .input-screen-intro {
+    font-family: 'Unbounded', sans-serif;
+    font-size: clamp(22px, 4vw, 30px);
+    font-weight: 700;
+    margin-bottom: 16px;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+  }
+  .input-screen-sub {
+    color: #555;
+    font-size: 16px;
+    margin-bottom: 32px;
+    line-height: 1.6;
+  }
+  .interest-input-wrap {
+    position: relative;
+    margin-bottom: 16px;
+  }
+  .interest-input {
+    width: 100%;
+    padding: 18px 22px;
+    font-size: 18px;
+    font-family: 'DM Sans', sans-serif;
+    border: 2px solid #e8e8e8;
+    border-radius: var(--radius);
+    outline: none;
+    transition: border-color 0.2s;
+    background: white;
+    color: var(--ink);
+  }
+  .interest-input:focus { border-color: var(--accent2); }
+  .interest-input::placeholder { color: #bbb; }
+
+  .btn-primary {
+    background: var(--ink);
+    color: var(--paper);
+    border: none;
+    border-radius: var(--radius);
+    padding: 16px 32px;
+    font-family: 'Unbounded', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    letter-spacing: 0.02em;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .btn-primary:hover {
+    background: var(--accent);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(255,107,53,0.3);
+  }
+  .btn-secondary {
+    background: transparent;
+    color: var(--muted);
+    border: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    cursor: pointer;
+    padding: 12px 0;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    transition: color 0.2s;
+  }
+  .btn-secondary:hover { color: var(--ink); }
+
+  /* Results screen */
+  .results-intro {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+  .results-badge {
+    display: inline-block;
+    background: var(--accent3);
+    color: var(--ink);
+    font-family: 'Unbounded', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 6px 14px;
+    border-radius: 100px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .results-headline {
+    font-family: 'Unbounded', sans-serif;
+    font-size: clamp(24px, 4vw, 36px);
+    font-weight: 900;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    margin-bottom: 12px;
+  }
+  .results-sub {
+    color: #555;
+    font-size: 16px;
+    line-height: 1.6;
+  }
+  .result-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-bottom: 36px;
+  }
+  .result-card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    padding: 24px 26px;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.07);
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    transition: all 0.2s;
+  }
+  .result-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 28px rgba(0,0,0,0.1);
+  }
+  .result-emoji {
+    font-size: 36px;
+    flex-shrink: 0;
+    width: 60px; height: 60px;
+    background: var(--warm);
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .result-info { flex: 1; }
+  .result-title {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 4px;
+    letter-spacing: -0.01em;
+  }
+  .result-desc {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.5;
+    margin-bottom: 10px;
+  }
+  .result-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--ink);
+    color: white;
+    text-decoration: none;
+    font-family: 'Unbounded', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 8px 14px;
+    border-radius: 100px;
+    letter-spacing: 0.04em;
+    transition: background 0.2s;
+  }
+  .result-link:hover { background: var(--accent); }
+
+  /* Bespoke screen */
+  .bespoke-screen {
+    background: var(--ink);
+    color: var(--paper);
+    border-radius: 28px;
+    padding: 40px 32px;
+    text-align: center;
+  }
+  .bespoke-emoji { font-size: 56px; margin-bottom: 20px; display: block; }
+  .bespoke-title {
+    font-family: 'Unbounded', sans-serif;
+    font-size: clamp(22px, 4vw, 30px);
+    font-weight: 900;
+    margin-bottom: 14px;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+  }
+  .bespoke-title .accent { color: var(--accent3); }
+  .bespoke-body {
+    font-size: 16px;
+    line-height: 1.7;
+    color: rgba(255,255,255,0.75);
+    margin-bottom: 28px;
+    max-width: 480px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .bespoke-steps {
+    background: rgba(255,255,255,0.07);
+    border-radius: var(--radius);
+    padding: 24px;
+    text-align: left;
+    margin-bottom: 28px;
+  }
+  .bespoke-step {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    margin-bottom: 16px;
+  }
+  .bespoke-step:last-child { margin-bottom: 0; }
+  .step-num {
+    width: 28px; height: 28px;
+    background: var(--accent3);
+    color: var(--ink);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Unbounded', sans-serif;
+    font-size: 12px;
+    font-weight: 900;
+    flex-shrink: 0;
+  }
+  .step-text { font-size: 14px; line-height: 1.6; color: rgba(255,255,255,0.85); padding-top: 3px; }
+  .platypus-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--accent3);
+    color: var(--ink);
+    text-decoration: none;
+    font-family: 'Unbounded', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 12px 22px;
+    border-radius: 100px;
+    letter-spacing: 0.04em;
+    transition: all 0.2s;
+  }
+  .platypus-link:hover {
+    background: var(--accent);
+    color: white;
+    transform: translateY(-2px);
+  }
+
+  /* AQA results screen */
+  .aqa-screen-intro {
+    font-family: 'Unbounded', sans-serif;
+    font-size: clamp(20px, 3.5vw, 28px);
+    font-weight: 700;
+    margin-bottom: 10px;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+  }
+  .aqa-topic-tag {
+    display: inline-block;
+    background: var(--accent);
+    color: white;
+    font-family: 'Unbounded', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 6px 16px;
+    border-radius: 100px;
+    margin-bottom: 20px;
+  }
+  .aqa-body {
+    font-size: 16px;
+    color: #555;
+    line-height: 1.6;
+    margin-bottom: 28px;
+  }
+  .aqa-search-btn {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: var(--ink);
+    color: white;
+    text-decoration: none;
+    border-radius: var(--radius);
+    padding: 20px 26px;
+    margin-bottom: 14px;
+    transition: all 0.2s;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+  }
+  .aqa-search-btn:hover {
+    background: var(--accent);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 28px rgba(255,107,53,0.3);
+  }
+  .aqa-search-icon {
+    width: 44px; height: 44px;
+    background: rgba(255,255,255,0.15);
+    border-radius: var(--radius-sm);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+  }
+  .aqa-search-text strong {
+    display: block;
+    font-family: 'Unbounded', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 2px;
+    letter-spacing: -0.01em;
+  }
+  .aqa-search-text span { font-size: 13px; color: rgba(255,255,255,0.7); }
+  .no-results-note {
+    background: var(--warm);
+    border-radius: var(--radius-sm);
+    padding: 18px 20px;
+    font-size: 14px;
+    color: #555;
+    line-height: 1.6;
+    margin-top: 20px;
+  }
+  .no-results-note strong { color: var(--ink); }
+  .no-results-note a { color: var(--accent); font-weight: 600; text-decoration: none; cursor: pointer; }
+  .no-results-note a:hover { text-decoration: underline; }
+
+  /* Back button */
+  .back-btn {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0;
+    margin-bottom: 28px;
+    transition: color 0.2s;
+  }
+  .back-btn:hover { color: var(--ink); }
+
+  /* Restart */
+  .restart-area {
+    text-align: center;
+    margin-top: 32px;
+  }
+
+  /* Animations */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Mobile */
+  @media (max-width: 500px) {
+    .options-grid { grid-template-columns: 1fr; }
+    .container { padding: 28px 16px 60px; }
+    .bespoke-screen { padding: 28px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <header class="site-header">
+    <div class="logo-mark">
+      <span class="logo-dot"></span>
+      Curiosity Finder
+    </div>
+  </header>
+
+  <!-- SCREEN 1: Welcome -->
+  <div class="screen active" id="screen-welcome">
+    <h1 class="welcome-headline">
+      What are you<br>
+      <span class="highlight">curious about?</span>
+    </h1>
+    <p class="welcome-sub">
+      There's a real certificate out there for almost anything you're into.
+      Let's find yours.
+    </p>
+    <div class="path-cards">
+      <div class="path-card" onclick="showScreen('screen-known')">
+        <div class="path-icon">💡</div>
+        <div class="path-text">
+          <strong>I already know what I'm into</strong>
+          <span>Type it in and we'll search for your certificate straight away</span>
+        </div>
+      </div>
+      <div class="path-card" onclick="startQuiz()">
+        <div class="path-icon">🔍</div>
+        <div class="path-text">
+          <strong>I'm not sure yet — help me figure it out</strong>
+          <span>Answer five quick questions and we'll find your thing</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCREEN 2: Known interest -->
+  <div class="screen" id="screen-known">
+    <button class="back-btn" onclick="showScreen('screen-welcome')">← Back</button>
+    <h2 class="input-screen-intro">What's your thing?</h2>
+    <p class="input-screen-sub">
+      Type anything — a game, a sport, an animal, a hobby. There are over 5,000 certificates. Something's in there for you.
+    </p>
+    <div class="interest-input-wrap">
+      <input
+        class="interest-input"
+        id="interest-input"
+        type="text"
+        placeholder="e.g. Minecraft, dogs, football, cooking..."
+        onkeydown="if(event.key==='Enter') goToAQA()"
+        autofocus
+      />
+    </div>
+    <button class="btn-primary" onclick="goToAQA()">Search for my certificate →</button>
+  </div>
+
+  <!-- SCREEN 3: AQA Search Results -->
+  <div class="screen" id="screen-aqa">
+    <button class="back-btn" onclick="showScreen('screen-known')">← Back</button>
+    <div class="aqa-topic-tag" id="aqa-topic-label">Topic</div>
+    <h2 class="aqa-screen-intro">Here's what we found<br>for you on AQA</h2>
+    <p class="aqa-body">
+      Click the button below to see all the real certificates available. If something looks right, show your teacher — they can get you started on it.
+    </p>
+    <a class="aqa-search-btn" id="aqa-link" href="#" target="_blank" rel="noopener">
+      <div class="aqa-search-icon">🏆</div>
+      <div class="aqa-search-text">
+        <strong id="aqa-link-label">Search AQA for this topic</strong>
+        <span>Opens the official AQA Unit Award Scheme</span>
+      </div>
+    </a>
+    <div class="no-results-note">
+      <strong>Nothing showing up?</strong> Sometimes AQA doesn't have a unit for a very specific topic — but that's okay. 
+      Your teacher can write a special unit just for you. 
+      <a onclick="showScreen('screen-bespoke')">Find out how →</a>
+    </div>
+  </div>
+
+  <!-- SCREEN 4: Quiz -->
+  <div class="screen" id="screen-quiz">
+    <button class="back-btn" onclick="showScreen('screen-welcome')">← Start again</button>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="progress-fill" style="width: 20%"></div>
+    </div>
+    <div class="question-counter" id="q-counter">Question 1 of 5</div>
+    <div class="question-text" id="q-text">Loading...</div>
+    <div class="options-grid" id="options-grid"></div>
+  </div>
+
+  <!-- SCREEN 5: Quiz Results -->
+  <div class="screen" id="screen-results">
+    <div class="results-intro">
+      <div class="results-badge">✨ Your matches</div>
+      <h2 class="results-headline">Here's where<br>your curiosity lives</h2>
+      <p class="results-sub">These are your three best matches. Pick one that feels right and search for your certificate.</p>
+    </div>
+    <div class="result-cards" id="result-cards"></div>
+    <div class="restart-area">
+      <button class="btn-secondary" onclick="restart()">Try again with different answers</button>
+    </div>
+  </div>
+
+  <!-- SCREEN 6: Bespoke unit -->
+  <div class="screen" id="screen-bespoke">
+    <button class="back-btn" id="bespoke-back-btn" onclick="showScreen('screen-aqa')">← Back</button>
+    <div class="bespoke-screen">
+      <span class="bespoke-emoji">🦆</span>
+      <h2 class="bespoke-title">Your topic is so <span class="accent">unique</span><br>AQA hasn't caught up yet</h2>
+      <p class="bespoke-body">
+        That's not a problem — it's actually kind of brilliant. It means your teacher can write a brand new certificate just for you. Here's how it works.
+      </p>
+      <div class="bespoke-steps">
+        <div class="bespoke-step">
+          <div class="step-num">1</div>
+          <div class="step-text"><strong>Tell your teacher</strong> what you're into. The more specific, the better.</div>
+        </div>
+        <div class="bespoke-step">
+          <div class="step-num">2</div>
+          <div class="step-text"><strong>They write a unit</strong> — a short document with 5 things you'll learn or do about your topic.</div>
+        </div>
+        <div class="bespoke-step">
+          <div class="step-num">3</div>
+          <div class="step-text"><strong>AQA approves it</strong> — and it becomes a real, official certificate with your name on it.</div>
+        </div>
+        <div class="bespoke-step">
+          <div class="step-num">4</div>
+          <div class="step-text"><strong>You do the work</strong> at your own pace, in your own way.</div>
+        </div>
+      </div>
+      <a class="platypus-link" href="#" onclick="showBespokeExample(); return false;">
+        See a worked example → 🦆
+      </a>
+    </div>
+    <div class="restart-area">
+      <button class="btn-secondary" onclick="restart()">Start over</button>
+    </div>
+  </div>
+
+  <!-- SCREEN 7: Platypus example -->
+  <div class="screen" id="screen-platypus">
+    <button class="back-btn" onclick="showScreen('screen-bespoke')">← Back</button>
+    <div class="bespoke-screen">
+      <span class="bespoke-emoji">🦆</span>
+      <h2 class="bespoke-title">The <span class="accent">Platypus</span><br>Unit — a real example</h2>
+      <p class="bespoke-body">
+        "Platypus" returns zero results on AQA. So a teacher wrote one from scratch. Here's what it looks like.
+      </p>
+      <div class="bespoke-steps">
+        <div class="bespoke-step">
+          <div class="step-num">📋</div>
+          <div class="step-text"><strong>Unit title:</strong> Introduction to the Platypus</div>
+        </div>
+        <div class="bespoke-step">
+          <div class="step-num">1</div>
+          <div class="step-text">Identify at least three physical features of a platypus</div>
+        </div>
+        <div class="bespoke-step">
+          <div class="step-num">2</div>
+          <div class="step-text">Describe where platypuses live and what they eat</div>
+        </div>
+        <div class="bespoke-step">
+          <div class="step-num">3</div>
+          <div class="step-text">Explain one thing that makes platypuses unusual compared to other mammals</div>
+        </div>
+        <div class="bespoke-step">
+          <div class="step-num">4</div>
+          <div class="step-text">Find out one threat to platypuses in the wild</div>
+        </div>
+        <div class="bespoke-step">
+          <div class="step-num">5</div>
+          <div class="step-text">Share what you've learned — in any way you choose</div>
+        </div>
+      </div>
+      <p style="color:rgba(255,255,255,0.6); font-size:13px; margin-top: 16px; line-height: 1.6;">
+        Five simple outcomes. Any topic. Any student. That's all it takes.
+      </p>
+    </div>
+    <div class="restart-area">
+      <button class="btn-secondary" onclick="restart()">Start over</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ─── QUIZ DATA ────────────────────────────────────────────────────────────────
+const questions = [
+  {
+    text: "When you've got free time, what do you actually end up doing?",
+    options: [
+      { emoji: "🎮", label: "Gaming or being online", cats: ["Gaming & Technology", "Computing & Digital Skills"] },
+      { emoji: "🎨", label: "Making or building stuff", cats: ["Art & Design", "Construction & Engineering"] },
+      { emoji: "🏃", label: "Moving around outside", cats: ["Sport & Physical Activity", "Nature & Environment"] },
+      { emoji: "🎵", label: "Music, videos or stories", cats: ["Performing Arts & Media", "Creative Writing & Communication"] },
+    ]
+  },
+  {
+    text: "What kind of thing could you talk about for hours?",
+    options: [
+      { emoji: "🐾", label: "Animals or nature", cats: ["Nature & Environment", "Animal Care & Science"] },
+      { emoji: "⚽", label: "A sport or physical skill", cats: ["Sport & Physical Activity", "Health & Wellbeing"] },
+      { emoji: "🔧", label: "How things work", cats: ["Construction & Engineering", "Computing & Digital Skills"] },
+      { emoji: "🍕", label: "Food or cooking", cats: ["Food & Catering", "Health & Wellbeing"] },
+    ]
+  },
+  {
+    text: "If you could spend a whole day doing one thing, what would it be?",
+    options: [
+      { emoji: "🌿", label: "Being outside exploring", cats: ["Nature & Environment", "Geography & Environment"] },
+      { emoji: "💻", label: "Creating something digital", cats: ["Computing & Digital Skills", "Gaming & Technology"] },
+      { emoji: "🎭", label: "Performing or creating", cats: ["Performing Arts & Media", "Art & Design"] },
+      { emoji: "🤝", label: "Helping or working with others", cats: ["Health & Social Care", "Community & Citizenship"] },
+    ]
+  },
+  {
+    text: "What subject or topic have you ever actually enjoyed — even a little bit?",
+    options: [
+      { emoji: "🔬", label: "Science or how things work", cats: ["Science", "Nature & Environment"] },
+      { emoji: "📖", label: "Reading, writing or stories", cats: ["Creative Writing & Communication", "Performing Arts & Media"] },
+      { emoji: "🧮", label: "Numbers, patterns or puzzles", cats: ["Mathematics & Numeracy", "Computing & Digital Skills"] },
+      { emoji: "🌍", label: "People, places or history", cats: ["Geography & Environment", "Community & Citizenship"] },
+    ]
+  },
+  {
+    text: "How do you prefer to show what you know?",
+    options: [
+      { emoji: "🗣️", label: "Talking or presenting", cats: ["Performing Arts & Media", "Community & Citizenship"] },
+      { emoji: "✏️", label: "Writing or drawing", cats: ["Art & Design", "Creative Writing & Communication"] },
+      { emoji: "🛠️", label: "Making or doing", cats: ["Construction & Engineering", "Animal Care & Science"] },
+      { emoji: "📱", label: "Video, photos or digital", cats: ["Computing & Digital Skills", "Performing Arts & Media"] },
+    ]
+  }
+];
+
+// AQA search term mapping
+const categorySearchTerms = {
+  "Gaming & Technology": "gaming",
+  "Computing & Digital Skills": "computing",
+  "Art & Design": "art",
+  "Construction & Engineering": "construction",
+  "Sport & Physical Activity": "sport",
+  "Nature & Environment": "environment",
+  "Performing Arts & Media": "performing arts",
+  "Creative Writing & Communication": "creative writing",
+  "Animal Care & Science": "animal",
+  "Health & Wellbeing": "health",
+  "Food & Catering": "food",
+  "Geography & Environment": "geography",
+  "Health & Social Care": "care",
+  "Community & Citizenship": "community",
+  "Science": "science",
+  "Mathematics & Numeracy": "maths",
+};
+
+const categoryEmojis = {
+  "Gaming & Technology": "🎮",
+  "Computing & Digital Skills": "💻",
+  "Art & Design": "🎨",
+  "Construction & Engineering": "🔧",
+  "Sport & Physical Activity": "⚽",
+  "Nature & Environment": "🌿",
+  "Performing Arts & Media": "🎭",
+  "Creative Writing & Communication": "✏️",
+  "Animal Care & Science": "🐾",
+  "Health & Wellbeing": "💪",
+  "Food & Catering": "🍕",
+  "Geography & Environment": "🌍",
+  "Health & Social Care": "🤝",
+  "Community & Citizenship": "🏘️",
+  "Science": "🔬",
+  "Mathematics & Numeracy": "🧮",
+};
+
+const categoryDescriptions = {
+  "Gaming & Technology": "From Minecraft to esports — there are certificates here",
+  "Computing & Digital Skills": "Coding, digital art, building websites and more",
+  "Art & Design": "Drawing, painting, sculpture, photography and design",
+  "Construction & Engineering": "Building, making, fixing and understanding how things work",
+  "Sport & Physical Activity": "Sport, fitness, coaching and physical skills",
+  "Nature & Environment": "Wildlife, ecology, conservation and the outdoors",
+  "Performing Arts & Media": "Drama, music, film, radio and creative performance",
+  "Creative Writing & Communication": "Stories, scripts, poetry and communication skills",
+  "Animal Care & Science": "Looking after animals and understanding living things",
+  "Health & Wellbeing": "Nutrition, fitness, mental health and self-care",
+  "Food & Catering": "Cooking, baking, food prep and catering skills",
+  "Geography & Environment": "Places, landscapes, climate and the world around us",
+  "Health & Social Care": "Caring for others, community support and social skills",
+  "Community & Citizenship": "Local projects, rights, responsibilities and community life",
+  "Science": "Biology, chemistry, physics and scientific investigation",
+  "Mathematics & Numeracy": "Numbers, patterns, problem-solving and everyday maths",
+};
+
+// ─── STATE ────────────────────────────────────────────────────────────────────
+let currentQ = 0;
+let scores = {};
+let bespokeBackTarget = 'screen-aqa';
+
+// ─── NAVIGATION ──────────────────────────────────────────────────────────────
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function showBespokeExample() {
+  showScreen('screen-platypus');
+}
+
+function restart() {
+  currentQ = 0;
+  scores = {};
+  document.getElementById('interest-input').value = '';
+  showScreen('screen-welcome');
+}
+
+// ─── KNOWN INTEREST PATH ─────────────────────────────────────────────────────
+function goToAQA() {
+  const val = document.getElementById('interest-input').value.trim();
+  if (!val) return;
+  const encoded = encodeURIComponent(val);
+  const url = `https://www.aqa.org.uk/programmes/unit-award-scheme/unit-search?limit=50&q=${encoded}&unitLevel=Pre-Entry+Level`;
+
+  document.getElementById('aqa-topic-label').textContent = val;
+  document.getElementById('aqa-link').href = url;
+  document.getElementById('aqa-link-label').textContent = `See certificates for "${val}"`;
+
+  // Set bespoke back to aqa
+  bespokeBackTarget = 'screen-aqa';
+  document.getElementById('bespoke-back-btn').onclick = () => showScreen('screen-aqa');
+
+  showScreen('screen-aqa');
+}
+
+// ─── QUIZ PATH ────────────────────────────────────────────────────────────────
+function startQuiz() {
+  currentQ = 0;
+  scores = {};
+  renderQuestion();
+  showScreen('screen-quiz');
+}
+
+function renderQuestion() {
+  const q = questions[currentQ];
+  document.getElementById('q-counter').textContent = `Question ${currentQ + 1} of ${questions.length}`;
+  document.getElementById('q-text').textContent = q.text;
+  document.getElementById('progress-fill').style.width = `${((currentQ + 1) / questions.length) * 100}%`;
+
+  const grid = document.getElementById('options-grid');
+  grid.innerHTML = '';
+  q.options.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.innerHTML = `<span class="option-emoji">${opt.emoji}</span><span class="option-label">${opt.label}</span>`;
+    btn.onclick = () => selectOption(opt, btn);
+    grid.appendChild(btn);
+  });
+}
+
+function selectOption(opt, btn) {
+  // Highlight briefly
+  document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+
+  // Score
+  opt.cats.forEach(cat => {
+    scores[cat] = (scores[cat] || 0) + 1;
+  });
+
+  setTimeout(() => {
+    currentQ++;
+    if (currentQ < questions.length) {
+      renderQuestion();
+    } else {
+      showResults();
+    }
+  }, 300);
+}
+
+function showResults() {
+  // Top 3 categories
+  const sorted = Object.entries(scores).sort((a, b) => b[1] - a[1]).slice(0, 3);
+
+  const container = document.getElementById('result-cards');
+  container.innerHTML = '';
+
+  sorted.forEach(([cat]) => {
+    const searchTerm = categorySearchTerms[cat] || cat.toLowerCase();
+    const encoded = encodeURIComponent(searchTerm);
+    const url = `https://www.aqa.org.uk/programmes/unit-award-scheme/unit-search?limit=50&q=${encoded}&unitLevel=Pre-Entry+Level`;
+
+    const card = document.createElement('div');
+    card.className = 'result-card';
+    card.innerHTML = `
+      <div class="result-emoji">${categoryEmojis[cat] || '🌟'}</div>
+      <div class="result-info">
+        <div class="result-title">${cat}</div>
+        <div class="result-desc">${categoryDescriptions[cat] || ''}</div>
+        <a class="result-link" href="${url}" target="_blank" rel="noopener">
+          Find my certificate →
+        </a>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+
+  // Add bespoke note
+  const note = document.createElement('div');
+  note.className = 'no-results-note';
+  note.innerHTML = `<strong>None of these feel right?</strong> No problem — <a onclick="goToBespokeFromResults()">your teacher can write a unit for literally anything</a>.`;
+  container.appendChild(note);
+
+  showScreen('screen-results');
+}
+
+function goToBespokeFromResults() {
+  document.getElementById('bespoke-back-btn').onclick = () => showScreen('screen-results');
+  showScreen('screen-bespoke');
+}
+</script>
+</body>
+</html>
