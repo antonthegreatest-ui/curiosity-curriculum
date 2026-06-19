@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PLIMS Builder — The Curiosity Curriculum</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --cream: #faf6ef;
+  --warm-white: #fff9f2;
+  --ink: #1c1917;
+  --ink-light: #57534e;
+  --ink-faint: #a8a29e;
+  --terracotta: #c1440e;
+  --terracotta-light: #f0d5cc;
+  --sage: #4a7c59;
+  --sage-light: #d4e8da;
+  --gold: #d4a017;
+  --gold-light: #f5e6b8;
+  --border: #e7e0d8;
+  --radius: 16px;
+  --radius-lg: 28px;
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background: var(--cream);
+  color: var(--ink);
+  min-height: 100vh;
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+nav {
+  background: var(--ink);
+  padding: 0 2rem;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.nav-brand {
+  font-family: 'Lora', serif;
+  font-size: 16px; font-weight: 600;
+  color: var(--cream); text-decoration: none;
+}
+.nav-back {
+  font-size: 13px; color: var(--ink-faint);
+  text-decoration: none; transition: color 0.15s;
+}
+.nav-back:hover { color: var(--cream); }
+
+.hero {
+  background: var(--ink);
+  padding: 3rem 2rem 3.5rem;
+  text-align: center;
+}
+.hero-eyebrow {
+  font-size: 12px; font-weight: 600;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--terracotta); margin-bottom: 12px;
+}
+.hero h1 {
+  font-family: 'Lora', serif;
+  font-size: clamp(28px, 5vw, 42px);
+  font-weight: 700; color: var(--cream);
+  line-height: 1.2; margin-bottom: 12px;
+}
+.hero h1 em { font-style: italic; color: var(--terracotta); }
+.hero-sub {
+  font-size: 16px; color: var(--ink-faint);
+  max-width: 480px; margin: 0 auto; line-height: 1.6;
+}
+
+.container {
+  max-width: 660px;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem 5rem;
+}
+
+.progress-wrap { margin-bottom: 2.5rem; }
+.progress-bar {
+  height: 3px; background: var(--border);
+  border-radius: 2px; overflow: hidden; margin-bottom: 8px;
+}
+.progress-fill {
+  height: 100%; background: var(--terracotta);
+  border-radius: 2px; transition: width 0.3s ease;
+}
+.progress-label { font-size: 12px; color: var(--ink-faint); font-weight: 500; letter-spacing: 0.04em; }
+
+.step { display: none; }
+.step.active { display: block; }
+
+.step-title {
+  font-family: 'Lora', serif;
+  font-size: 26px; font-weight: 700;
+  line-height: 1.25; margin-bottom: 8px;
+}
+.step-sub {
+  font-size: 15px; color: var(--ink-light);
+  margin-bottom: 2rem; line-height: 1.6;
+}
+
+.field { margin-bottom: 1.5rem; }
+.field-label {
+  display: block; font-size: 13px; font-weight: 600;
+  margin-bottom: 6px; color: var(--ink-light); letter-spacing: 0.02em;
+}
+textarea, input[type="text"], input[type="number"] {
+  width: 100%; padding: 12px 14px;
+  border: 1.5px solid var(--border); border-radius: var(--radius);
+  font-size: 14px; line-height: 1.6;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  color: var(--ink); background: var(--warm-white);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+textarea { resize: vertical; min-height: 88px; }
+textarea:focus, input[type="text"]:focus, input[type="number"]:focus {
+  outline: none; border-color: var(--terracotta);
+  box-shadow: 0 0 0 3px var(--terracotta-light);
+}
+textarea::placeholder, input::placeholder { color: var(--ink-faint); }
+
+/* ── CHIPS ── */
+.suggestions { margin-top: 8px; }
+.suggestion-label {
+  font-size: 11px; font-weight: 600; color: var(--ink-faint);
+  letter-spacing: 0.05em; text-transform: uppercase;
+  display: block; margin-bottom: 6px;
+}
+.chip-row { display: flex; flex-wrap: wrap; gap: 6px; min-height: 32px; }
+.chip {
+  display: inline-block;
+  font-size: 12px; line-height: 1.45;
+  padding: 5px 11px;
+  border: 1.5px solid var(--border);
+  border-radius: 20px;
+  background: var(--warm-white);
+  color: var(--ink-light);
+  cursor: pointer;
+  transition: all 0.12s;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  text-align: left;
+}
+.chip:hover { background: var(--gold-light); border-color: var(--gold); color: var(--ink); }
+.chip.used { background: var(--sage-light); border-color: var(--sage); color: var(--sage); }
+
+/* Skeleton loading chips */
+.chip-skeleton {
+  display: inline-block;
+  height: 30px; border-radius: 20px;
+  background: var(--border);
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+@keyframes shimmer {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.9; }
+}
+
+/* ── TRM ── */
+.trm-note {
+  font-size: 13px; color: var(--ink-light);
+  background: var(--warm-white);
+  border: 1.5px solid var(--border); border-radius: var(--radius);
+  padding: 12px 16px; margin-bottom: 1.25rem; line-height: 1.55;
+}
+.trm-list { display: flex; flex-direction: column; gap: 8px; }
+.trm-card {
+  border: 1.5px solid var(--border); border-radius: var(--radius);
+  padding: 14px 18px; cursor: pointer;
+  background: var(--warm-white); transition: border-color 0.12s, background 0.12s;
+}
+.trm-card:hover { border-color: var(--terracotta); background: #fffaf7; }
+.trm-card.selected { border-color: var(--terracotta); background: var(--terracotta-light); }
+.trm-behaviour { font-size: 14px; line-height: 1.55; margin-bottom: 6px; }
+.trm-meta { display: flex; align-items: center; gap: 8px; }
+.trm-badge {
+  font-size: 11px; font-weight: 700; padding: 2px 10px;
+  border-radius: 20px; background: var(--border); color: var(--ink-light);
+}
+.trm-card.selected .trm-badge { background: var(--terracotta); color: #fff; }
+.trm-name { font-size: 12px; color: var(--ink-faint); font-style: italic; }
+.trm-card.selected .trm-name { color: var(--terracotta); }
+
+/* ── AREA BUILDER ── */
+.area-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
+.area-row {
+  display: grid;
+  grid-template-columns: 1fr 120px 36px;
+  gap: 8px; align-items: center;
+  background: var(--warm-white);
+  border: 1.5px solid var(--border); border-radius: var(--radius);
+  padding: 10px 14px; transition: border-color 0.12s;
+}
+.area-row:focus-within { border-color: var(--terracotta); }
+.area-row input[type="text"] {
+  border: none; padding: 0; background: transparent;
+  font-size: 14px; box-shadow: none;
+}
+.area-row input[type="text"]:focus { border: none; box-shadow: none; }
+.area-count-wrap { display: flex; align-items: center; gap: 6px; }
+.area-count-wrap .field-label { font-size: 12px; margin: 0; white-space: nowrap; }
+.area-count-wrap input[type="number"] {
+  width: 46px; padding: 5px 8px; font-size: 13px;
+  border-radius: 8px; text-align: center;
+}
+.remove-btn {
+  width: 32px; height: 32px;
+  border: 1.5px solid var(--border); border-radius: 10px;
+  background: var(--cream); color: var(--ink-faint);
+  cursor: pointer; font-size: 16px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; transition: all 0.12s;
+}
+.remove-btn:hover { background: var(--terracotta-light); color: var(--terracotta); border-color: var(--terracotta); }
+
+.add-area-btn {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 14px; font-weight: 600;
+  color: var(--sage); background: var(--sage-light);
+  border: 1.5px dashed var(--sage); border-radius: var(--radius);
+  padding: 12px 18px; cursor: pointer; width: 100%;
+  transition: background 0.12s;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+.add-area-btn:hover { background: #c2deca; }
+.area-hint { font-size: 13px; color: var(--ink-faint); margin-top: 10px; line-height: 1.5; }
+
+/* ── DOMAIN NOTES ── */
+.domain-block {
+  border: 1.5px solid var(--border); border-radius: var(--radius);
+  padding: 1.1rem 1.25rem; margin-bottom: 10px;
+  background: var(--warm-white);
+}
+.domain-title {
+  font-size: 13px; font-weight: 700; color: var(--ink-light);
+  margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.06em;
+}
+
+/* ── BUTTONS ── */
+.btn-row { display: flex; gap: 10px; margin-top: 2rem; align-items: center; flex-wrap: wrap; }
+.btn {
+  padding: 12px 24px; border-radius: var(--radius);
+  font-size: 14px; font-weight: 600; cursor: pointer;
+  border: 1.5px solid var(--border);
+  background: var(--warm-white); color: var(--ink);
+  transition: all 0.12s;
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+.btn:hover { background: var(--cream); border-color: var(--ink-faint); }
+.btn.primary { background: var(--terracotta); color: #fff; border-color: var(--terracotta); }
+.btn.primary:hover { background: #a33a0c; border-color: #a33a0c; }
+.btn.primary:disabled { background: var(--border); color: var(--ink-faint); border-color: var(--border); cursor: not-allowed; }
+.back-link {
+  font-size: 14px; color: var(--ink-faint); cursor: pointer;
+  display: flex; align-items: center; gap: 5px;
+  background: none; border: none;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 500; transition: color 0.12s;
+}
+.back-link:hover { color: var(--ink); }
+
+/* ── GENERATING ── */
+.generating { text-align: center; padding: 5rem 0; }
+.spinner {
+  width: 38px; height: 38px;
+  border: 3px solid var(--border); border-top-color: var(--terracotta);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 1.25rem;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.gen-label { font-size: 15px; color: var(--ink-light); font-family: 'Lora', serif; font-style: italic; }
+
+/* ── OUTPUT ── */
+.out-section { margin-bottom: 2rem; }
+.out-domain-header {
+  display: flex; align-items: center;
+  margin-bottom: 10px; padding-bottom: 8px;
+  border-bottom: 1.5px solid var(--border);
+}
+.out-domain-label {
+  font-size: 11px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-light);
+}
+.target-list { display: flex; flex-direction: column; gap: 6px; }
+.target-item {
+  display: flex; align-items: flex-start;
+  background: var(--warm-white);
+  border: 1.5px solid var(--border); border-radius: var(--radius);
+  overflow: hidden; transition: border-color 0.12s;
+}
+.target-item:focus-within { border-color: var(--sage); }
+.target-prefix {
+  font-weight: 700; color: var(--sage);
+  font-size: 13px; padding: 12px 4px 12px 14px;
+  white-space: nowrap; line-height: 1.55; flex-shrink: 0;
+}
+.target-input {
+  flex: 1; border: none; background: transparent;
+  padding: 12px 14px 12px 4px;
+  font-size: 14px; line-height: 1.55; color: var(--ink);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  resize: none; min-height: 46px; overflow: hidden;
+}
+.target-input:focus { outline: none; box-shadow: none; }
+
+.out-note {
+  font-size: 13px; color: var(--ink-faint);
+  margin-top: 1.5rem; line-height: 1.6;
+  padding: 12px 16px; background: var(--warm-white);
+  border-radius: var(--radius); border: 1.5px solid var(--border);
+  font-style: italic;
+}
+.action-btn {
+  padding: 10px 20px; font-size: 13px; font-weight: 600;
+  border-radius: var(--radius); border: 1.5px solid var(--border);
+  background: var(--warm-white); color: var(--ink);
+  cursor: pointer; display: inline-flex; align-items: center; gap: 7px;
+  font-family: 'Plus Jakarta Sans', sans-serif; transition: all 0.12s;
+}
+.action-btn:hover { background: var(--cream); border-color: var(--ink-faint); }
+.action-btn.sage { background: var(--sage-light); color: var(--sage); border-color: var(--sage); }
+.action-btn.sage:hover { background: #c2deca; }
+
+.error-box {
+  background: var(--terracotta-light); border: 1.5px solid var(--terracotta);
+  border-radius: var(--radius); padding: 14px 18px;
+  font-size: 14px; color: var(--terracotta); margin-top: 1rem; line-height: 1.5;
+}
+
+footer {
+  text-align: center; font-size: 13px; color: var(--ink-faint);
+  padding: 2.5rem 2rem; border-top: 1.5px solid var(--border);
+}
+footer a { color: var(--ink-light); text-decoration: none; }
+footer a:hover { color: var(--ink); }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="index.html">The Curiosity Curriculum</a>
+  <a class="nav-back" href="index.html">← Back to tools</a>
+</nav>
+
+<div class="hero">
+  <div class="hero-eyebrow">PLIMS Builder</div>
+  <h1>A map built around <em>every</em> young person</h1>
+  <p class="hero-sub">Generate personalised learning intention targets — anonymised, editable, and ready to use.</p>
+</div>
+
+<div class="container">
+
+  <div class="progress-wrap">
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:20%"></div></div>
+    <div class="progress-label" id="progress-label">Step 1 of 5</div>
+  </div>
+
+  <!-- ── STEP 0: Profile ── -->
+  <div class="step active" id="step0">
+    <div class="step-title">Tell us about this young person</div>
+    <div class="step-sub">No names or identifying information — describe what they can do, where they struggle, and how they are best supported. Click any suggestion to add it to the field.</div>
+
+    <div class="field">
+      <label class="field-label">My strengths</label>
+      <textarea id="s-strengths" placeholder="What does this young person do well?"></textarea>
+      <div class="suggestions">
+        <span class="suggestion-label">Suggestions — click to use</span>
+        <div class="chip-row" id="chips-strengths">
+          <span class="chip-skeleton" style="width:140px"></span>
+          <span class="chip-skeleton" style="width:110px"></span>
+          <span class="chip-skeleton" style="width:160px"></span>
+          <span class="chip-skeleton" style="width:125px"></span>
+          <span class="chip-skeleton" style="width:95px"></span>
+          <span class="chip-skeleton" style="width:145px"></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="field-label">My needs and current challenges</label>
+      <textarea id="s-needs" placeholder="What does this young person find hard?"></textarea>
+      <div class="suggestions">
+        <span class="suggestion-label">Suggestions — click to use</span>
+        <div class="chip-row" id="chips-needs">
+          <span class="chip-skeleton" style="width:155px"></span>
+          <span class="chip-skeleton" style="width:120px"></span>
+          <span class="chip-skeleton" style="width:170px"></span>
+          <span class="chip-skeleton" style="width:100px"></span>
+          <span class="chip-skeleton" style="width:140px"></span>
+          <span class="chip-skeleton" style="width:115px"></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="field-label">My support strategies</label>
+      <textarea id="s-support" placeholder="What already helps this young person?"></textarea>
+      <div class="suggestions">
+        <span class="suggestion-label">Suggestions — click to use</span>
+        <div class="chip-row" id="chips-support">
+          <span class="chip-skeleton" style="width:130px"></span>
+          <span class="chip-skeleton" style="width:160px"></span>
+          <span class="chip-skeleton" style="width:105px"></span>
+          <span class="chip-skeleton" style="width:150px"></span>
+          <span class="chip-skeleton" style="width:120px"></span>
+          <span class="chip-skeleton" style="width:140px"></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn primary" onclick="goStep(1)">Next →</button>
+    </div>
+  </div>
+
+  <!-- ── STEP 1: TRM ── -->
+  <div class="step" id="step1">
+    <div class="step-title">Where are they right now?</div>
+    <div class="step-sub">Pick the description that best matches this young person. This sets the right level of ambition for their targets.</div>
+    <div class="trm-note">If you know the Trauma Recovery Model, these map to Levels 1–6. If not, just read each description and choose the one that fits best.</div>
+    <div class="trm-list">
+      <div class="trm-card" data-level="1" onclick="selectTRM(this)">
+        <div class="trm-behaviour">They are focused on basic safety and day-to-day survival. Learning is not yet accessible. Adults are not yet trusted.</div>
+        <div class="trm-meta"><span class="trm-badge">TRM Level 1</span><span class="trm-name">Survival</span></div>
+      </div>
+      <div class="trm-card" data-level="2" onclick="selectTRM(this)">
+        <div class="trm-behaviour">They are beginning to tolerate familiar adults. Routine and predictability matter enormously. They can engage in simple, structured activities.</div>
+        <div class="trm-meta"><span class="trm-badge">TRM Level 2</span><span class="trm-name">Safety &amp; stabilisation</span></div>
+      </div>
+      <div class="trm-card" data-level="3" onclick="selectTRM(this)">
+        <div class="trm-behaviour">They have a secure base with at least one key adult. They are beginning to take small risks — in learning, in relationships, in new situations.</div>
+        <div class="trm-meta"><span class="trm-badge">TRM Level 3</span><span class="trm-name">Trusting relationships</span></div>
+      </div>
+      <div class="trm-card" data-level="4" onclick="selectTRM(this)">
+        <div class="trm-behaviour">They are developing confidence and self-efficacy. They can approach adults with needs or feelings. They try new things and tolerate not being immediately good at them.</div>
+        <div class="trm-meta"><span class="trm-badge">TRM Level 4</span><span class="trm-name">Competence &amp; mastery</span></div>
+      </div>
+      <div class="trm-card" data-level="5" onclick="selectTRM(this)">
+        <div class="trm-behaviour">They are beginning to consider the impact of their actions on others. They can reflect on their own behaviour and start to make different choices.</div>
+        <div class="trm-meta"><span class="trm-badge">TRM Level 5</span><span class="trm-name">Consequential thinking</span></div>
+      </div>
+      <div class="trm-card" data-level="6" onclick="selectTRM(this)">
+        <div class="trm-behaviour">They have a consolidated sense of identity. They can reflect on their past, manage transitions, and think about their future with some confidence.</div>
+        <div class="trm-meta"><span class="trm-badge">TRM Level 6</span><span class="trm-name">Integration</span></div>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="back-link" onclick="goStep(0)">← Back</button>
+      <button class="btn primary" id="btn-step1" onclick="goStep(2)" disabled>Next →</button>
+    </div>
+  </div>
+
+  <!-- ── STEP 2: Area builder ── -->
+  <div class="step" id="step2">
+    <div class="step-title">Build your PLIM areas</div>
+    <div class="step-sub">Add each area your school uses — name it and choose how many targets to generate. Everything is editable after.</div>
+    <div class="area-list" id="area-list"></div>
+    <button class="add-area-btn" onclick="addArea()">+ Add a PLIM area</button>
+    <p class="area-hint">e.g. Health &amp; Wellbeing · Communication · Independence · Community · EHCP outcomes · Vocational skills</p>
+    <div class="btn-row">
+      <button class="back-link" onclick="goStep(1)">← Back</button>
+      <button class="btn primary" onclick="goStep(3)">Next →</button>
+    </div>
+  </div>
+
+  <!-- ── STEP 3: Domain notes ── -->
+  <div class="step" id="step3">
+    <div class="step-title">Any area-specific detail?</div>
+    <div class="step-sub">Add context for each area — or leave blank and targets will be drawn from the profile you already described.</div>
+    <div id="domain-fields"></div>
+    <div class="btn-row">
+      <button class="back-link" onclick="goStep(2)">← Back</button>
+      <button class="btn primary" onclick="goStep(4)">Generate PLIM ✦</button>
+    </div>
+  </div>
+
+  <!-- ── STEP 4: Output ── -->
+  <div class="step" id="step4">
+    <div id="generating" class="generating">
+      <div class="spinner"></div>
+      <p class="gen-label">Building personalised targets…</p>
+    </div>
+    <div id="output" style="display:none">
+      <div class="step-title" style="margin-bottom:0.5rem">Personalised Learning Intention Map</div>
+      <p class="step-sub" style="margin-bottom:2rem">Targets are editable — click any line to refine the wording before you copy.</p>
+      <div id="out-domains"></div>
+      <div class="btn-row" style="margin-top:1rem">
+        <button class="action-btn sage" onclick="copyAll()">⎘ Copy all targets</button>
+        <button class="action-btn" onclick="resetBuilder()">↺ Build another</button>
+      </div>
+      <p class="out-note">No data has been stored or transmitted beyond generating these targets. Review and adjust before use.</p>
+    </div>
+    <div id="err-box" style="display:none" class="error-box"></div>
+  </div>
+
+</div>
+
+<footer>
+  <p><a href="index.html">The Curiosity Curriculum</a> · Free &amp; open-source resources for SEMH educators · <a href="index.html#tools">All tools</a></p>
+</footer>
+
+<script>
+
+let trmLevel = null;
+let areas = [];
+let allTargets = {};
+
+const trmNames = {
+  1: 'Survival', 2: 'Safety & Stabilisation', 3: 'Trusting Relationships',
+  4: 'Competence & Mastery', 5: 'Consequential Thinking', 6: 'Integration'
+};
+
+/* ── CHIP SUGGESTIONS: load on page start ── */
+async function loadSuggestions() {
+  const prompt = `You are an expert SEMH educator. Return the most commonly observed and clinically useful descriptors used in SEMH schools when writing student profiles for Personalised Learning Intention Maps (PLIMs).
+
+Return exactly this JSON structure — no preamble, no markdown, no backticks:
+{
+  "strengths": [8 short phrases, 3–7 words each, describing common genuine strengths of SEMH learners],
+  "needs": [8 short phrases, 3–7 words each, describing the most common needs and challenges of SEMH learners],
+  "support": [8 short phrases, 3–7 words each, describing the most commonly used and effective support strategies in SEMH settings]
+}
+
+Rules:
+- Phrase each strength as a noun phrase: e.g. "Strong verbal communication skills"
+- Phrase each need as a noun phrase describing the challenge: e.g. "Difficulty regulating emotions when dysregulated"
+- Phrase each support strategy as a noun phrase: e.g. "Regular check-ins with a key adult"
+- Be specific and realistic — avoid generic platitudes
+- Reflect the real landscape of SEMH learners aged 11–18`;
+
+  try {
+    const resp = await fetch('/api/anthropic', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        
+        'anthropic-version': '2023-06-01'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 600,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    if (!resp.ok) throw new Error('API error ' + resp.status);
+    const data = await resp.json();
+    const raw = data.content.filter(b => b.type === 'text').map(b => b.text).join('');
+    const parsed = JSON.parse(raw.replace(/```json|```/g, '').trim());
+
+    renderChips('chips-strengths', 's-strengths', parsed.strengths || []);
+    renderChips('chips-needs', 's-needs', parsed.needs || []);
+    renderChips('chips-support', 's-support', parsed.support || []);
+  } catch (e) {
+    // Fallback to hardcoded if API fails
+    renderChips('chips-strengths', 's-strengths', [
+      'Strong verbal communication skills',
+      'Good engagement with structured tasks',
+      'Responds well to trusted adults',
+      'Creative and imaginative thinker',
+      'Motivated when given choice and autonomy',
+      'Warm and humorous with familiar peers',
+      'Capable of producing independent written work',
+      'Shows empathy toward others when regulated'
+    ]);
+    renderChips('chips-needs', 's-needs', [
+      'Rarely joins peer activities or games',
+      'Difficulty regulating emotions when dysregulated',
+      'Avoids contributing in group settings',
+      'Struggles to manage feelings of homesickness',
+      'Low tolerance for frustration and setbacks',
+      'Difficulty initiating or sustaining peer relationships',
+      'Relies heavily on adult support to manage transitions',
+      'Avoidance of tasks perceived as difficult'
+    ]);
+    renderChips('chips-support', 's-support', [
+      'Visual timetables and clear daily structure',
+      'Regular check-ins with a key adult',
+      'Co-regulation support before transitions',
+      'Movement breaks between sessions',
+      'Advance warning of changes to routine',
+      'Positive behaviour recognition systems',
+      'Reduced written output expectations',
+      'Quiet space available for self-regulation'
+    ]);
+  }
+}
+
+function renderChips(containerId, fieldId, items) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = '';
+  items.forEach(text => {
+    const chip = document.createElement('button');
+    chip.className = 'chip';
+    chip.textContent = text;
+    chip.onclick = () => fillField(fieldId, chip);
+    container.appendChild(chip);
+  });
+}
+
+function fillField(id, chipEl) {
+  const ta = document.getElementById(id);
+  const val = ta.value.trim();
+  const text = chipEl.textContent.trim();
+  ta.value = val ? val + ', ' + text.toLowerCase() : text;
+  ta.focus();
+  autoResize(ta);
+  chipEl.classList.add('used');
+  setTimeout(() => chipEl.classList.remove('used'), 1200);
+}
+
+/* ── PROGRESS ── */
+function updateProgress(n) {
+  const pct = ((n + 1) / 5) * 100;
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-label').textContent = 'Step ' + (n + 1) + ' of 5';
+}
+
+/* ── NAVIGATION ── */
+function goStep(n) {
+  if (n === 1) {
+    const strengths = document.getElementById('s-strengths').value.trim();
+    const needs = document.getElementById('s-needs').value.trim();
+    if (!strengths || !needs) {
+      alert('Please describe both the strengths and the key needs before continuing.');
+      return;
+    }
+  }
+  if (n === 3) {
+    const rows = document.querySelectorAll('.area-row');
+    const valid = [];
+    rows.forEach(row => {
+      const name = row.querySelector('.area-name').value.trim();
+      const count = Math.max(1, Math.min(10, parseInt(row.querySelector('.area-count').value) || 4));
+      if (name) valid.push({ name, count, notes: '' });
+    });
+    if (valid.length === 0) {
+      alert('Please add at least one PLIM area before continuing.');
+      return;
+    }
+    areas = valid;
+    buildDomainFields();
+  }
+  if (n === 4) {
+    areas.forEach((a, i) => {
+      const el = document.getElementById('dnotes-' + i);
+      a.notes = el ? el.value.trim() : '';
+    });
+    generatePLIM();
+  }
+  document.querySelectorAll('.step').forEach((s, i) => s.classList.toggle('active', i === n));
+  updateProgress(n);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function selectTRM(el) {
+  document.querySelectorAll('.trm-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  trmLevel = parseInt(el.dataset.level);
+  document.getElementById('btn-step1').disabled = false;
+}
+
+function addArea(name, count) {
+  const list = document.getElementById('area-list');
+  const row = document.createElement('div');
+  row.className = 'area-row';
+  row.innerHTML = `
+    <input type="text" class="area-name" placeholder="Area name, e.g. Communication" value="${name || ''}" />
+    <div class="area-count-wrap">
+      <label class="field-label">Targets</label>
+      <input type="number" class="area-count" value="${count || 4}" min="1" max="10" />
+    </div>
+    <button class="remove-btn" onclick="removeArea(this)" title="Remove">×</button>
+  `;
+  list.appendChild(row);
+  if (!name) row.querySelector('.area-name').focus();
+}
+
+function removeArea(btn) { btn.closest('.area-row').remove(); }
+
+function buildDomainFields() {
+  const container = document.getElementById('domain-fields');
+  container.innerHTML = '';
+  areas.forEach((a, i) => {
+    const block = document.createElement('div');
+    block.className = 'domain-block';
+    block.innerHTML = `
+      <div class="domain-title">${a.name}</div>
+      <textarea id="dnotes-${i}" placeholder="Specific challenges or context for ${a.name} — or leave blank to draw from the profile above…"></textarea>
+    `;
+    container.appendChild(block);
+  });
+}
+
+function slugify(name) {
+  return name.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
+}
+
+/* ── GENERATE PLIM ── */
+async function generatePLIM() {
+  document.getElementById('generating').style.display = 'block';
+  document.getElementById('output').style.display = 'none';
+  document.getElementById('err-box').style.display = 'none';
+
+  const strengths = document.getElementById('s-strengths').value.trim();
+  const needs = document.getElementById('s-needs').value.trim();
+  const support = document.getElementById('s-support').value.trim();
+  const nextLevel = Math.min(trmLevel + 2, 6);
+
+  const areaInstructions = areas.map(a =>
+    `- "${slugify(a.name)}" (${a.name}): generate exactly ${a.count} target${a.count !== 1 ? 's' : ''}${a.notes ? '. Specific context: ' + a.notes : ' — draw from key needs above'}`
+  ).join('\n');
+
+  const emptyJson = '{' + areas.map(a =>
+    `"${slugify(a.name)}":[${Array(a.count).fill('"…"').join(',')}]`
+  ).join(',') + '}';
+
+  const prompt = `You are an expert SEMH educator writing a Personalised Learning Intention Map (PLIM) using the Trauma Recovery Model (TRM).
+
+Student profile (anonymised):
+- TRM current level: ${trmLevel} — ${trmNames[trmLevel]}
+- Target TRM range: pushing toward levels ${trmLevel + 1}–${nextLevel}
+- Strengths: ${strengths}
+- Key needs and challenges: ${needs}
+- Support strategies already in place: ${support || 'not specified'}
+
+PLIM areas to generate:
+${areaInstructions}
+
+RULES — follow exactly:
+1. Write exactly the number of targets specified per area. No more, no fewer.
+2. Do NOT write "I can" — the interface adds it. Write only the rest of the sentence.
+3. Every target must be concretely measurable — include frequency ("at least once per week"), duration ("for 20 minutes"), or observable condition ("without adult prompting").
+4. Target the student's GENUINE difficulty areas — not generic SEMH needs. If described as a strong communicator, do not write basic communication targets; focus on specific challenges (reciprocal conversation, group contribution, self-advocacy).
+5. No targets that are developmentally premature or unlikely to be achieved within one school term.
+6. TRM anchors ambition: Levels 1–2 = safety and routine; Level 3 = small risks and relationships; Levels 4–5 = self-efficacy and reflection; Level 6 = identity and transition.
+7. Where support strategies are provided, targets should complement them — not duplicate them.
+
+Respond ONLY with valid JSON. No preamble, no markdown fences. Use this exact structure:
+${emptyJson}`;
+
+  try {
+    const resp = await fetch('/api/anthropic', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        
+        'anthropic-version': '2023-06-01'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 2000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    if (!resp.ok) {
+      const err = await resp.json();
+      throw new Error(err.error?.message || 'API error ' + resp.status);
+    }
+
+    const data = await resp.json();
+    const raw = data.content.filter(b => b.type === 'text').map(b => b.text).join('');
+    allTargets = JSON.parse(raw.replace(/```json|```/g, '').trim());
+    renderOutput();
+  } catch (e) {
+    document.getElementById('generating').style.display = 'none';
+    const eb = document.getElementById('err-box');
+    eb.textContent = 'Something went wrong generating the targets. Please try again. (' + e.message + ')';
+    eb.style.display = 'block';
+  }
+}
+
+/* ── OUTPUT ── */
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = el.scrollHeight + 'px';
+}
+
+function renderOutput() {
+  document.getElementById('generating').style.display = 'none';
+  const c = document.getElementById('out-domains');
+  c.innerHTML = '';
+  areas.forEach(a => {
+    const key = slugify(a.name);
+    const targets = allTargets[key] || [];
+    const sec = document.createElement('div');
+    sec.className = 'out-section';
+    const header = document.createElement('div');
+    header.className = 'out-domain-header';
+    header.innerHTML = `<span class="out-domain-label">${a.name}</span>`;
+    sec.appendChild(header);
+    const list = document.createElement('div');
+    list.className = 'target-list';
+    targets.forEach(t => {
+      const item = document.createElement('div');
+      item.className = 'target-item';
+      const prefix = document.createElement('span');
+      prefix.className = 'target-prefix';
+      prefix.textContent = 'I can ';
+      const input = document.createElement('textarea');
+      input.className = 'target-input';
+      input.value = t;
+      input.rows = 1;
+      input.addEventListener('input', () => autoResize(input));
+      item.appendChild(prefix);
+      item.appendChild(input);
+      list.appendChild(item);
+    });
+    sec.appendChild(list);
+    c.appendChild(sec);
+  });
+  document.getElementById('output').style.display = 'block';
+  setTimeout(() => {
+    document.querySelectorAll('.target-input').forEach(el => autoResize(el));
+  }, 50);
+}
+
+function copyAll() {
+  let text = '';
+  document.querySelectorAll('.out-section').forEach(sec => {
+    const label = sec.querySelector('.out-domain-label').textContent;
+    text += label.toUpperCase() + '\n';
+    sec.querySelectorAll('.target-input').forEach(inp => {
+      text += 'I can ' + inp.value.trim() + '\n';
+    });
+    text += '\n';
+  });
+  navigator.clipboard.writeText(text.trim()).then(() => {
+    const btn = event.target.closest('button');
+    const orig = btn.innerHTML;
+    btn.innerHTML = '✓ Copied to clipboard';
+    setTimeout(() => { btn.innerHTML = orig; }, 2500);
+  });
+}
+
+function resetBuilder() {
+  ['s-strengths', 's-needs', 's-support'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  document.querySelectorAll('.chip.used').forEach(c => c.classList.remove('used'));
+  document.getElementById('area-list').innerHTML = '';
+  document.getElementById('domain-fields').innerHTML = '';
+  document.querySelectorAll('.trm-card').forEach(c => c.classList.remove('selected'));
+  trmLevel = null; areas = []; allTargets = {};
+  document.getElementById('btn-step1').disabled = true;
+  document.getElementById('output').style.display = 'none';
+  document.getElementById('err-box').style.display = 'none';
+  goStep(0);
+}
+
+/* ── INIT ── */
+loadSuggestions();
+</script>
+
+</body>
+</html>
