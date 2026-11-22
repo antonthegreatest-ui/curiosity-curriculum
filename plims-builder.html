@@ -493,6 +493,7 @@ footer a:hover { color: var(--ink); }
       <div id="out-domains"></div>
       <div class="btn-row" style="margin-top:1rem">
         <button class="action-btn sage" onclick="copyAll()">⎘ Copy all targets</button>
+        <button class="action-btn" onclick="toMapper()">🎯 Map to a lesson →</button>
         <button class="action-btn" onclick="resetBuilder()">↺ Build another</button>
       </div>
       <p class="out-note">No data has been stored or transmitted beyond generating these targets. Review and adjust before use.</p>
@@ -839,6 +840,18 @@ function copyAll() {
     btn.innerHTML = '✓ Copied to clipboard';
     setTimeout(() => { btn.innerHTML = orig; }, 2500);
   });
+}
+
+/* ── HAND-OFF TO PLIM MAPPER (this tab only, cleared when the tab closes) ── */
+function toMapper() {
+  let text = '';
+  document.querySelectorAll('.out-section').forEach(sec => {
+    text += sec.querySelector('.out-domain-label').textContent.toUpperCase() + '\n';
+    sec.querySelectorAll('.target-input').forEach(inp => { text += 'I can ' + inp.value.trim() + '\n'; });
+    text += '\n';
+  });
+  try { sessionStorage.setItem('cc_plim', JSON.stringify(text.trim())); } catch (_) {}
+  location.href = 'plim-mapper.html';
 }
 
 function resetBuilder() {

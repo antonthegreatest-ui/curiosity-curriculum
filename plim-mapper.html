@@ -1,0 +1,1286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PLIM Mapper — The Curiosity Curriculum</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --cream: #faf6ef; --warm-white: #fff9f2; --ink: #1c1917; --ink-light: #57534e; --ink-faint: #a8a29e;
+  --terracotta: #c1440e; --terracotta-light: #f0d5cc; --sage: #4a7c59; --sage-light: #d4e8da;
+  --gold: #d4a017; --gold-light: #f5e6b8; --border: #e7e0d8; --radius: 16px; --radius-lg: 28px;
+}
+body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--cream); color: var(--ink); min-height: 100vh; font-size: 16px; line-height: 1.6; }
+nav { background: var(--ink); padding: 0 2rem; height: 60px; display: flex; align-items: center; justify-content: space-between; }
+.nav-brand { font-family: 'Lora', serif; font-size: 16px; font-weight: 600; color: var(--cream); text-decoration: none; }
+.nav-back { font-size: 13px; color: var(--ink-faint); text-decoration: none; transition: color 0.15s; }
+.nav-back:hover { color: var(--cream); }
+.hero { background: var(--ink); padding: 3rem 2rem 3.5rem; text-align: center; }
+.hero-eyebrow { font-size: 12px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--terracotta); margin-bottom: 12px; }
+.hero h1 { font-family: 'Lora', serif; font-size: clamp(28px, 5vw, 42px); font-weight: 700; color: var(--cream); line-height: 1.2; margin-bottom: 12px; }
+.hero h1 em { font-style: italic; color: var(--terracotta); }
+.hero-sub { font-size: 16px; color: var(--ink-faint); max-width: 560px; margin: 0 auto; line-height: 1.6; }
+.hero-journey { display: flex; justify-content: center; flex-wrap: wrap; gap: 2px; margin-top: 1.75rem; }
+
+.container { max-width: 860px; margin: 0 auto; padding: 2.5rem 1.5rem 5rem; }
+.card { background: #fff; border: 1.5px solid var(--border); border-radius: var(--radius-lg); padding: 1.75rem 1.75rem 2rem; margin-bottom: 1.5rem; }
+.card-tag { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--terracotta); margin-bottom: 6px; }
+.card-tag.sage { color: var(--sage); }
+.step-title { font-family: 'Lora', serif; font-size: 24px; font-weight: 700; line-height: 1.25; margin-bottom: 6px; }
+.step-sub { font-size: 15px; color: var(--ink-light); margin-bottom: 1.5rem; line-height: 1.6; }
+.field { margin-bottom: 1.25rem; }
+.field-label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: var(--ink-light); letter-spacing: 0.02em; }
+.field-hint { font-size: 12px; color: var(--ink-faint); margin-top: 5px; line-height: 1.5; }
+textarea, input[type="text"], select {
+  width: 100%; padding: 12px 14px; border: 1.5px solid var(--border); border-radius: var(--radius);
+  font-size: 14px; line-height: 1.6; font-family: 'Plus Jakarta Sans', sans-serif; color: var(--ink); background: var(--warm-white);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+textarea { resize: vertical; min-height: 88px; }
+textarea:focus, input[type="text"]:focus, select:focus { outline: none; border-color: var(--terracotta); box-shadow: 0 0 0 3px var(--terracotta-light); }
+textarea::placeholder, input::placeholder { color: var(--ink-faint); }
+.grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+/* privacy panel */
+.privacy { display: flex; gap: 14px; background: var(--sage-light); border: 1.5px solid #b9d6c1; border-radius: var(--radius); padding: 14px 18px; margin-bottom: 1.5rem; font-size: 13.5px; line-height: 1.6; color: #2f5a3c; }
+.privacy b { color: #24462f; }
+.privacy-icon { font-size: 22px; line-height: 1; }
+.privacy ul { margin: 4px 0 0 18px; }
+
+/* upload */
+.src-tabs { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
+.src-tab { padding: 7px 14px; border-radius: 100px; border: 1.5px solid var(--border); background: var(--warm-white); font: 600 13px 'Plus Jakarta Sans', sans-serif; color: var(--ink-light); cursor: pointer; }
+.src-tab.active { background: var(--ink); color: var(--cream); border-color: var(--ink); }
+.src-pane { display: none; }
+.src-pane.active { display: block; }
+.drop { border: 2px dashed var(--border); border-radius: var(--radius); background: var(--warm-white); padding: 2rem 1rem; text-align: center; cursor: pointer; transition: all 0.15s; display: block; }
+.drop:hover, .drop.over { border-color: var(--terracotta); background: #fffaf7; }
+.drop input { display: none; }
+.drop-big { font-family: 'Lora', serif; font-size: 18px; font-weight: 600; margin: 6px 0 4px; }
+.drop-small { font-size: 13px; color: var(--ink-faint); }
+.file-status { font-size: 13px; margin-top: 10px; min-height: 1px; }
+.file-status.ok { color: var(--sage); font-weight: 600; }
+.file-status.err { color: var(--terracotta); font-weight: 600; }
+.file-status.busy { color: var(--ink-light); font-style: italic; }
+textarea.paste { min-height: 220px; font-size: 13px; }
+.gdoc-tip { font-size: 12.5px; color: var(--ink-light); background: var(--warm-white); border: 1.5px solid var(--border); border-radius: 12px; padding: 10px 14px; margin-top: 10px; line-height: 1.55; }
+
+/* buttons */
+.btn-row { display: flex; gap: 10px; margin-top: 1.5rem; align-items: center; flex-wrap: wrap; }
+.btn { padding: 12px 22px; border-radius: var(--radius); font-size: 14px; font-weight: 600; cursor: pointer; border: 1.5px solid var(--border); background: var(--warm-white); color: var(--ink); transition: all 0.12s; display: inline-flex; align-items: center; gap: 8px; font-family: 'Plus Jakarta Sans', sans-serif; text-decoration: none; }
+.btn:hover { background: var(--cream); border-color: var(--ink-faint); }
+.btn.primary { background: var(--terracotta); color: #fff; border-color: var(--terracotta); }
+.btn.primary:hover { background: #a33a0c; border-color: #a33a0c; }
+.btn.primary:disabled { background: var(--border); color: var(--ink-faint); border-color: var(--border); cursor: not-allowed; }
+.btn.sage { background: var(--sage-light); color: var(--sage); border-color: var(--sage); }
+.btn.dark { background: var(--ink); color: var(--cream); border-color: var(--ink); }
+.btn.dark:hover { background: var(--terracotta); border-color: var(--terracotta); }
+.btn.ghost { background: transparent; }
+.btn.small { padding: 7px 12px; font-size: 12.5px; border-radius: 10px; }
+
+/* sticker kit */
+.kit-controls { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; margin-bottom: 1rem; font-size: 13.5px; color: var(--ink-light); }
+.kit-controls label { display: inline-flex; gap: 6px; align-items: center; cursor: pointer; }
+.kit-controls input[type=text] { width: 260px; padding: 8px 12px; font-size: 13px; }
+.kit-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+.kit-phase { border: 1.5px solid var(--border); border-radius: var(--radius); padding: 12px; background: var(--warm-white); }
+.kit-phase h4 { font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-light); margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+.kit-phase h4 i { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+.kit-items { display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-end; }
+.kit-item { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.kit-item img { display: block; height: 38px; width: auto; border-radius: 4px; cursor: pointer; }
+.kit-item img.bar { height: 30px; }
+.kit-item img.ic { height: 44px; }
+.kit-acts { display: flex; gap: 4px; }
+.kit-acts button { font: 600 11px 'Plus Jakarta Sans', sans-serif; padding: 3px 8px; border-radius: 8px; border: 1px solid var(--border); background: #fff; cursor: pointer; color: var(--ink-light); }
+.kit-acts button:hover { border-color: var(--terracotta); color: var(--terracotta); }
+.kit-wide { grid-column: 1 / -1; }
+.kit-wide img { height: 44px; }
+.kit-wide .kit-item:first-child { width: 100%; }
+.kit-wide .kit-item:first-child img { height: auto; width: 100%; max-width: 760px; }
+
+/* options */
+.pill-group { display: flex; flex-wrap: wrap; gap: 6px; }
+.pill { padding: 7px 13px; border-radius: 100px; border: 1.5px solid var(--border); background: var(--warm-white); font: 600 13px 'Plus Jakarta Sans', sans-serif; color: var(--ink-light); cursor: pointer; }
+.pill.on { background: var(--terracotta-light); border-color: var(--terracotta); color: var(--terracotta); }
+
+/* progress */
+.gen { display: none; padding: 1.5rem 0 0.5rem; }
+.gen.show { display: block; }
+.gen-steps { display: flex; flex-direction: column; gap: 6px; }
+.gen-step { display: flex; align-items: center; gap: 10px; font-size: 14px; color: var(--ink-faint); }
+.gen-step .dot { width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--border); flex-shrink: 0; }
+.gen-step.busy { color: var(--ink); }
+.gen-step.busy .dot { border-color: var(--border); border-top-color: var(--terracotta); animation: spin 0.8s linear infinite; }
+.gen-step.done { color: var(--sage); }
+.gen-step.done .dot { background: var(--sage); border-color: var(--sage); }
+.gen-step.fail { color: var(--terracotta); }
+.gen-step.fail .dot { background: var(--terracotta); border-color: var(--terracotta); }
+@keyframes spin { to { transform: rotate(360deg); } }
+.error-box { background: var(--terracotta-light); color: #7a2a08; border-radius: var(--radius); padding: 14px 18px; margin-top: 1rem; font-size: 14px; display: none; }
+
+/* outputs */
+.out-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 1rem; }
+.out-tab { padding: 9px 16px; border-radius: 100px; border: 1.5px solid var(--border); background: var(--warm-white); font: 600 13.5px 'Plus Jakarta Sans', sans-serif; color: var(--ink-light); cursor: pointer; }
+.out-tab.active { background: var(--ink); color: var(--cream); border-color: var(--ink); }
+.out-pane { display: none; }
+.out-pane.active { display: block; }
+.out-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 1rem; }
+.preview { background: #e9e4dc; border-radius: var(--radius); padding: 18px; overflow-x: auto; }
+.preview > div { background: #fff; box-shadow: 0 4px 18px rgba(0,0,0,0.08); margin: 0 auto; }
+.note { font-size: 13px; color: var(--ink-light); line-height: 1.6; margin-top: 1rem; padding: 12px 16px; background: var(--warm-white); border-radius: var(--radius); border: 1.5px solid var(--border); }
+.note b { color: var(--ink); }
+
+/* editable phase map */
+.map-row { display: grid; grid-template-columns: 150px 1fr; gap: 12px; border: 1.5px solid var(--border); border-radius: var(--radius); padding: 12px; margin-bottom: 8px; background: var(--warm-white); }
+.map-row .lbl { display: flex; flex-direction: column; gap: 6px; }
+.map-row input, .map-row textarea { font-size: 13px; padding: 8px 10px; border-radius: 10px; }
+.map-row textarea { min-height: 54px; }
+.mini { font-size: 11px; font-weight: 700; color: var(--ink-faint); text-transform: uppercase; letter-spacing: 0.06em; margin: 6px 0 3px; }
+.added-flag { font-size: 11px; font-weight: 700; color: var(--terracotta); background: var(--terracotta-light); border-radius: 6px; padding: 2px 7px; align-self: flex-start; }
+
+/* modal + toast */
+.modal-wrap { position: fixed; inset: 0; background: rgba(28,25,23,0.55); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 1rem; }
+.modal { background: #fff; border-radius: var(--radius-lg); padding: 1.75rem; max-width: 560px; width: 100%; max-height: 90vh; overflow: auto; }
+.modal-icon { font-size: 30px; }
+.modal h3 { font-family: 'Lora', serif; font-size: 22px; margin: 4px 0 6px; }
+.modal p { font-size: 14px; color: var(--ink-light); }
+.pii-list { list-style: none; margin: 12px 0 0; display: flex; flex-direction: column; gap: 6px; }
+.pii-list li { display: flex; justify-content: space-between; gap: 10px; font-size: 13px; background: var(--warm-white); border: 1px solid var(--border); border-radius: 10px; padding: 7px 10px; }
+.pii-list code { color: var(--terracotta); font-size: 12px; word-break: break-all; }
+#toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(30px); background: var(--ink); color: var(--cream); padding: 10px 20px; border-radius: 100px; font-size: 14px; font-weight: 600; opacity: 0; transition: all 0.25s; z-index: 1100; pointer-events: none; }
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+footer { text-align: center; padding: 2rem; font-size: 13px; color: var(--ink-faint); border-top: 1px solid var(--border); }
+footer a { color: var(--ink-light); }
+@media (max-width: 680px) {
+  .grid3, .grid2, .kit-grid { grid-template-columns: 1fr; }
+  .map-row { grid-template-columns: 1fr; }
+  .card { padding: 1.25rem; }
+}
+
+.t-group { margin-bottom: 1rem; }
+.t-group h4 { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-light); border-bottom: 1.5px solid var(--border); padding-bottom: 6px; margin-bottom: 8px; }
+.t-row { display: grid; grid-template-columns: 52px 1fr auto 32px; gap: 8px; align-items: center; margin-bottom: 6px; }
+.t-row input[type=text] { padding: 9px 12px; font-size: 13.5px; border-radius: 12px; }
+.t-id { font-weight: 800; font-size: 13px; color: var(--terracotta); background: var(--terracotta-light); border-radius: 8px; text-align: center; padding: 6px 0; }
+.t-priv { display: inline-flex; gap: 6px; align-items: center; font-size: 12px; font-weight: 600; color: var(--ink-light); cursor: pointer; white-space: nowrap; }
+.t-row.private input[type=text] { background: #f1efec; }
+.t-x { width: 30px; height: 30px; border: 1.5px solid var(--border); border-radius: 9px; background: var(--cream); color: var(--ink-faint); cursor: pointer; }
+.t-x:hover { color: var(--terracotta); border-color: var(--terracotta); }
+.lesson-in { border: 1.5px solid var(--sage); background: var(--sage-light); border-radius: var(--radius); padding: 14px 18px; }
+.lesson-in b { font-family: 'Lora', serif; font-size: 18px; }
+.checks { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 1rem; }
+.check { font-size: 12.5px; font-weight: 600; padding: 5px 11px; border-radius: 100px; background: var(--sage-light); color: var(--sage); }
+.check.warn { background: var(--gold-light); color: #7a5b00; }
+.m-row { display: grid; grid-template-columns: 150px 1fr; gap: 12px; border: 1.5px solid var(--border); border-left-width: 6px; border-radius: var(--radius); padding: 12px; margin-bottom: 8px; background: var(--warm-white); }
+.m-row select, .m-row input { font-size: 13px; padding: 8px 10px; border-radius: 10px; }
+.m-row .verb { font-size: 12.5px; color: var(--ink-light); background: #fff; border: 1px dashed var(--border); border-radius: 10px; padding: 7px 10px; }
+</style>
+<style id="out-css">
+.chev{--c:#444;display:inline-flex;align-items:center;gap:6px;background:var(--c);color:#fff;font:800 12px 'Plus Jakarta Sans',Arial,sans-serif;padding:4px 18px 4px 12px;clip-path:polygon(0 0,calc(100% - 10px) 0,100% 50%,calc(100% - 10px) 100%,0 100%,10px 50%);margin-right:-4px;white-space:nowrap;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.chev:first-child{clip-path:polygon(0 0,calc(100% - 10px) 0,100% 50%,calc(100% - 10px) 100%,0 100%);padding-left:8px}
+.chev img{width:20px;height:20px;background:#fff;border-radius:4px}
+.ws{width:794px;max-width:100%;padding:34px 38px;font-family:'Plus Jakarta Sans',Arial,sans-serif;color:#1c1917;background:#fff}
+.ws-top{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;border-bottom:2px solid #1c1917;padding-bottom:8px;margin-bottom:12px}
+.ws-top h1{font-family:'Lora',Georgia,serif;font-size:26px;line-height:1.2}
+.ws-meta{display:flex;gap:18px;font-size:13px;color:#57534e;white-space:nowrap}
+.ws-journey{display:flex;flex-wrap:wrap;margin-bottom:14px}
+.ws-words{border:2px solid #d4a017;background:#fdf6e3;border-radius:12px;padding:10px 14px;margin-bottom:16px;display:grid;grid-template-columns:1fr 1fr;gap:4px 18px;break-inside:avoid}
+.ws-words-h{grid-column:1/-1;font-weight:800;font-size:14px}
+.ws-word{display:flex;gap:8px;align-items:baseline;font-size:14px}
+.ws-word span:last-child{color:#57534e;font-size:12.5px}
+.ws-emoji{font-size:18px}
+.ws-phase{--c:#444;--l:#eee;border:2px solid var(--c);border-radius:14px;margin-bottom:16px;overflow:hidden;break-inside:avoid;page-break-inside:avoid}
+.ws-head{background:var(--c);color:#fff;display:flex;align-items:center;gap:12px;padding:7px 10px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.ws-head img{width:40px;height:40px;background:#fff;border-radius:8px;flex-shrink:0}
+.ws-head div{flex:1;font-size:15px}
+.ws-head b{font-size:18px;font-weight:800}
+.ws-head em{font-style:normal;font-size:12px;font-weight:700;background:rgba(255,255,255,.22);padding:2px 8px;border-radius:20px}
+.ws-body{padding:12px 16px 14px}
+.ws-target{background:var(--l);border-left:6px solid var(--c);border-radius:8px;padding:7px 12px;margin-bottom:10px;font-size:14.5px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.ws-say{font-size:17px;font-weight:700;line-height:1.45;margin-bottom:10px}
+.ws-task{margin-bottom:10px}
+.ws-task-t{display:flex;gap:9px;font-size:14.5px;line-height:1.5}
+.ws-num{flex-shrink:0;width:22px;height:22px;border-radius:50%;color:#fff;font-weight:800;font-size:12px;display:flex;align-items:center;justify-content:center;margin-top:1px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.ws-line{border-bottom:1.5px solid #a8a29e;height:30px;margin-left:31px}
+.ws-starters{background:#f5f5f4;border-radius:10px;padding:8px 12px;font-size:13.5px;font-style:italic;margin-top:6px}
+.ws-starters b{font-style:normal;display:block;font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:#57534e}
+.ws-rate{margin-top:10px;border-top:1.5px dashed #d6d3d1;padding-top:10px}
+.ws-rate b{font-size:14px}
+.ws-rate-row{display:flex;align-items:center;gap:10px;margin-top:7px;font-size:13.5px}
+.ws-rate-row span:nth-child(2){flex:1}
+.faces{display:inline-flex;gap:6px}
+.faces img{width:26px;height:26px}
+.ws-teacher{background:#e7e5e4;color:#44403c;border-radius:10px;padding:8px 12px;font-size:12.5px;margin-top:10px}
+.ws-teacher b{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.06em}
+.tb{width:1123px;max-width:100%;padding:26px 28px;font-family:'Plus Jakarta Sans',Arial,sans-serif;color:#1c1917;background:#faf6ef;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.tb-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px}
+.tb-top h2{font-family:'Lora',Georgia,serif;font-size:24px}
+.tb-top span{font-size:13px;color:#57534e}
+.tb-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}
+.tb-col{--c:#444;--l:#eee;background:var(--l);border:2px solid var(--c);border-radius:12px;overflow:hidden;display:flex;flex-direction:column}
+.tb-head{background:var(--c);color:#fff;text-align:center;padding:10px 6px 8px;font-size:14px}
+.tb-head img{width:46px;height:46px;display:block;margin:0 auto 4px;background:#fff;border-radius:8px}
+.tb-card{background:#fff;margin:10px 8px;border-radius:10px;border:1px solid #e7e0d8;padding:10px;flex:1;display:flex;flex-direction:column;gap:8px;min-height:190px}
+.tb-task{font-weight:700;font-size:14px;line-height:1.4;flex:1}
+.tb-target{font-size:12px;font-weight:700;background:#fdf6e3;border:1.5px solid #d4a017;border-radius:8px;padding:6px 7px}
+.tb-done{display:flex;align-items:center;gap:8px;font-weight:800;font-size:14px}
+.tb-box{width:24px;height:24px;border:2px solid #1c1917;border-radius:5px;background:#fff}
+.tb-learn{font-size:11.5px;font-style:italic;color:#44403c;padding:0 10px 10px;line-height:1.4}
+.tm{width:1123px;max-width:100%;padding:26px 28px;font-family:'Plus Jakarta Sans',Arial,sans-serif;color:#1c1917;background:#fff}
+.tm h2{font-family:'Lora',Georgia,serif;font-size:22px}
+.tm-sub{font-size:13px;color:#57534e;margin:2px 0 12px}
+.tm table{width:100%;border-collapse:collapse;font-size:12.5px}
+.tm th{background:#1c1917;color:#faf6ef;text-align:left;padding:7px 8px;font-size:11.5px;text-transform:uppercase;letter-spacing:.04em;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.tm td{border:1px solid #d6d3d1;padding:7px 8px;vertical-align:top;line-height:1.45}
+.tm td.ph{color:#fff;font-weight:800;white-space:nowrap;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.tm td.ph img{width:26px;height:26px;background:#fff;border-radius:5px;display:block;margin-bottom:4px}
+.tm .id{font-weight:800;color:#c1440e}
+.tm .priv{display:inline-block;font-size:10.5px;font-weight:800;background:#1c1917;color:#fff;border-radius:5px;padding:1px 6px;margin-left:4px}
+.tm .ev{white-space:nowrap;font-size:12px}
+.tm .ev span{display:block;margin-bottom:3px}
+.tm .ev i{display:inline-block;width:13px;height:13px;border:1.5px solid #1c1917;border-radius:3px;vertical-align:-2px;margin-right:5px}
+.tm .tweak{display:block;margin-top:4px;color:#4a7c59;font-weight:600}
+.tc{width:794px;max-width:100%;padding:34px 38px;font-family:'Plus Jakarta Sans',Arial,sans-serif;color:#1c1917;background:#fff}
+.tc h1{font-family:'Lora',Georgia,serif;font-size:26px}
+.tc-sub{font-size:13px;color:#57534e;margin-bottom:16px}
+.tc-row{display:flex;align-items:center;gap:14px;border:2px solid var(--c);border-radius:14px;padding:10px 14px;margin-bottom:12px;background:var(--l);break-inside:avoid;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.tc-row>img{width:52px;height:52px;background:#fff;border-radius:10px}
+.tc-row .tc-t{flex:1}
+.tc-row .tc-t b{display:block;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:#44403c}
+.tc-row .tc-t span{font-size:19px;font-weight:800;line-height:1.3}
+.tc-row .faces img{width:36px;height:36px}
+
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="index.html">The Curiosity Curriculum</a>
+  <a class="nav-back" href="index.html#tools">← Back to tools</a>
+</nav>
+
+<div class="hero">
+  <div class="hero-eyebrow">PLIM Mapper</div>
+  <h1>Put each target where it <em>fits</em></h1>
+  <p class="hero-sub">Place a learner's PLIM targets in the DELBAR phases of any lesson, so every activity gives them a real chance to show progress.</p>
+  <div class="hero-journey" id="hero-journey"></div>
+</div>
+
+<div class="container">
+
+  <div class="privacy">
+    <div class="privacy-icon">🛡️</div>
+    <div><b>Anonymous by design.</b> No sign-in, no cookies, nothing saved on our server.
+      <ul>
+        <li>The learner reference you type <b>never leaves this device</b>. It is only printed on your sheets.</li>
+        <li>Only the target wording and the lesson text are sent to the AI. Files are read inside your browser.</li>
+        <li>Mark personal targets as <b>Staff only</b>. They stay off anything a pupil or their peers can see.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ── 1. PLIM ── -->
+  <div class="card">
+    <div class="card-tag">Step 1</div>
+    <div class="step-title">The learner's PLIM targets</div>
+    <p class="step-sub" id="plim-sub">Paste targets from the PLIMS Builder or any PLIM. Put each domain name on its own line, with its targets underneath.</p>
+    <div class="grid2">
+      <div class="field"><label class="field-label">Learner reference (optional)</label>
+        <input type="text" id="learner" maxlength="12" placeholder="Initials or a code, e.g. AB">
+        <div class="field-hint">Stays on this device. Never sent to the AI.</div></div>
+      <div class="field"><label class="field-label">Lesson or unit (optional)</label>
+        <input type="text" id="unit" placeholder="e.g. Forces L3">
+        <div class="field-hint">Printed on the teacher map.</div></div>
+    </div>
+    <div class="field">
+      <label class="field-label">PLIM targets</label>
+      <textarea id="plim-text" style="min-height:180px" placeholder="MY HEALTH&#10;I can name how I feel using a feelings chart&#10;I can use a calm-down strategy when I feel frustrated&#10;&#10;MY COMMUNICATION&#10;I can ask an adult for help using a help card&#10;…"></textarea>
+    </div>
+    <div class="btn-row" style="margin-top:0"><button class="btn dark" id="read-plim">Read the targets</button><button class="btn ghost" id="add-target">+ Add a target</button></div>
+    <div id="targets" style="margin-top:1.25rem"></div>
+  </div>
+
+  <!-- ── 2. LESSON ── -->
+  <div class="card">
+    <div class="card-tag">Step 2</div>
+    <div class="step-title">The lesson or resource</div>
+    <div id="lesson-in" style="display:none"></div>
+    <div id="src-wrap">
+      <p class="step-sub">A worksheet, task board, slide deck or lesson plan. For a full personalised worksheet, wrap it in the <a href="delbar-wrapper.html">DELBAR Wrapper</a> first and press "Map PLIM targets".</p>
+      <div id="src">
+        <div class="src-tabs">
+          <button class="src-tab active" data-pane="file">Upload a file</button>
+          <button class="src-tab" data-pane="paste">Paste text</button>
+        </div>
+        <div class="src-pane active" data-pane="file">
+          <label class="drop">
+            <input type="file" accept=".docx,.pptx,.pdf,.txt,.md,.html">
+            <div style="font-size:30px">📄</div>
+            <div class="drop-big">Drop a file here or click to choose</div>
+            <div class="drop-small">.docx · .pptx · .pdf · .txt</div>
+          </label>
+          <div class="file-status"></div>
+          <div class="gdoc-tip"><b>Google Docs or Slides?</b> Use File → Download → .docx or .pptx, then drop it here. Or select all, copy, and use the Paste text tab.</div>
+        </div>
+        <div class="src-pane" data-pane="paste">
+          <textarea class="paste" id="src-text" placeholder="Paste the text of the lesson, worksheet or slides here…"></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn primary" id="go">Map the targets ✦</button>
+      <span class="field-hint" style="margin:0">Takes about 15 seconds.</span>
+    </div>
+    <div class="gen" id="gen"><div class="gen-steps" id="gen-steps"></div></div>
+    <div class="error-box" id="err"></div>
+  </div>
+
+  <!-- ── 3. RESULTS ── -->
+  <div class="card" id="results" style="display:none">
+    <div class="card-tag sage">Step 3 · check and print</div>
+    <div class="step-title">The target map</div>
+    <p class="step-sub">One target per phase at most. Change anything below, then press Update.</p>
+    <div class="checks" id="checks"></div>
+    <div id="maps"></div>
+    <div class="btn-row" style="margin-top:0.5rem"><button class="btn ghost" id="add-map">+ Add a mapping</button><button class="btn primary" id="apply-map">Update the outputs</button></div>
+
+    <div class="out-tabs" style="margin-top:2rem">
+      <button class="out-tab active" data-pane="tm">Teacher map</button>
+      <button class="out-tab" data-pane="tc">Pupil target strip</button>
+      <button class="out-tab" data-pane="tb">Personal task board</button>
+      <button class="out-tab" data-pane="ws" id="tab-ws" style="display:none">Personal worksheet</button>
+    </div>
+    <div class="out-pane active" data-pane="tm">
+      <div class="out-actions"><button class="btn small dark" data-dl="docx-tm">⬇ Word</button><button class="btn small" data-dl="print-tm">🖨 Print or save as PDF</button></div>
+      <div class="preview"><div id="tm-preview"></div></div>
+    </div>
+    <div class="out-pane" data-pane="tc">
+      <div class="out-actions"><button class="btn small dark" data-dl="docx-tc">⬇ Word</button><button class="btn small" data-dl="print-tc">🖨 Print or save as PDF</button></div>
+      <div class="preview"><div id="tc-preview"></div></div>
+      <div class="note">Sits beside the learner's own copy of the resource. They tick a face for each target in Review.</div>
+    </div>
+    <div class="out-pane" data-pane="tb">
+      <div class="out-actions"><button class="btn small dark" data-dl="pptx-tb">⬇ Task board (PowerPoint)</button><button class="btn small" data-dl="print-tb">🖨 Print or save as PDF</button></div>
+      <div class="preview"><div id="tb-preview"></div></div>
+    </div>
+    <div class="out-pane" data-pane="ws">
+      <div class="out-actions"><button class="btn small dark" data-dl="docx-ws">⬇ Word</button><button class="btn small" data-dl="print-ws">🖨 Print or save as PDF</button></div>
+      <div class="preview"><div id="ws-preview"></div></div>
+    </div>
+    <div class="note" style="margin-top:1.5rem">Staff-only targets appear on the teacher map only. Pupil sheets use the neutral wording. Whole-class slides carry no individual targets. <button class="btn small ghost" id="clear" style="margin-left:6px">Clear everything from this tab</button></div>
+  </div>
+
+</div>
+
+<footer>
+  <p><a href="index.html">The Curiosity Curriculum</a> · Free &amp; open-source resources for SEMH educators · <a href="index.html#tools">All tools</a></p>
+</footer>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   DELBAR shared engine · The Curiosity Curriculum
+   Anonymous by design: files are read in the browser, nothing is
+   stored on a server, hand-offs use this tab's sessionStorage only.
+   ═══════════════════════════════════════════════════════════════ */
+
+const ICONS = {"do_now": "data:image/png;base64,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", "engage": "data:image/png;base64,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", "learn": "data:image/png;base64,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", "build": "data:image/png;base64,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", "apply": "data:image/png;base64,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", "review": "data:image/png;base64,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"};
+
+const PHASES = [
+  { key: 'do_now', name: 'Do Now', num: 1, hex: '#2E5FA7', light: '#DCE6F4', purpose: 'Starter, warm-up or prior-knowledge check. Calm, routine, can be started without help.' },
+  { key: 'engage', name: 'Engage', num: 2, hex: '#5FAF47', light: '#E1F1DB', purpose: 'Hook that sparks curiosity: a question, object, picture or puzzle. Explore before naming.' },
+  { key: 'learn',  name: 'Learn',  num: 3, hex: '#F2B444', light: '#FDF0D5', purpose: 'New content, direct instruction, worked examples, key vocabulary named.' },
+  { key: 'build',  name: 'Build',  num: 4, hex: '#E7823E', light: '#FBE3D2', purpose: 'Guided practice with support: partly completed examples, paired work, sentence starters.' },
+  { key: 'apply',  name: 'Apply',  num: 5, hex: '#D54848', light: '#F7DADA', purpose: 'Independent practice or problem solving, using what was learned.' },
+  { key: 'review', name: 'Review', num: 6, hex: '#A64899', light: '#EFDCEC', purpose: 'Reflection, self-assessment and consolidation. What went well, what next.' }
+];
+const PHASE = Object.fromEntries(PHASES.map(p => [p.key, p]));
+const MODEL = 'claude-sonnet-4-6';
+
+/* ── small helpers ── */
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+function esc(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+function slug(s) { return String(s || 'lesson').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 50) || 'lesson'; }
+function downloadBlob(blob, name) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+}
+function dataURLtoBytes(url) {
+  const b = atob(url.split(',')[1]); const u = new Uint8Array(b.length);
+  for (let i = 0; i < b.length; i++) u[i] = b.charCodeAt(i);
+  return u;
+}
+function toast(msg) {
+  let t = $('#toast');
+  if (!t) { t = document.createElement('div'); t.id = 'toast'; document.body.appendChild(t); }
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('show'), 2600);
+}
+
+/* ── lazy library loading (only fetched when a teacher needs them) ── */
+const LIBS = {
+  mammoth: 'https://cdn.jsdelivr.net/npm/mammoth@1.8.0/mammoth.browser.min.js',
+  jszip: 'https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js',
+  pdf: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js',
+  pdfWorker: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js',
+  pptx: 'https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js',
+  docx: 'https://cdn.jsdelivr.net/npm/docx@9.5.1/dist/index.iife.js'
+};
+const _loaded = {};
+function loadLib(name) {
+  if (_loaded[name]) return _loaded[name];
+  _loaded[name] = new Promise((res, rej) => {
+    const s = document.createElement('script');
+    s.src = LIBS[name]; s.onload = res;
+    s.onerror = () => { delete _loaded[name]; rej(new Error('Could not load a helper library. Check your internet connection.')); };
+    document.head.appendChild(s);
+  });
+  return _loaded[name];
+}
+
+/* ═════════ 1. READ A RESOURCE (in the browser, never uploaded) ═════════ */
+async function extractText(file) {
+  const name = file.name.toLowerCase();
+  if (name.endsWith('.docx')) {
+    await loadLib('mammoth');
+    const r = await mammoth.extractRawText({ arrayBuffer: await file.arrayBuffer() });
+    return r.value;
+  }
+  if (name.endsWith('.pptx')) {
+    await loadLib('jszip');
+    const zip = await JSZip.loadAsync(await file.arrayBuffer());
+    const slides = Object.keys(zip.files)
+      .filter(f => /^ppt\/slides\/slide\d+\.xml$/.test(f))
+      .sort((a, b) => parseInt(a.match(/\d+/)[0]) - parseInt(b.match(/\d+/)[0]));
+    const out = [];
+    for (let i = 0; i < slides.length; i++) {
+      const xml = await zip.file(slides[i]).async('string');
+      const paras = xml.split(/<\/a:p>/).map(p => (p.match(/<a:t>([^<]*)<\/a:t>/g) || []).map(t => t.replace(/<\/?a:t>/g, '')).join('')).filter(t => t.trim());
+      out.push('Slide ' + (i + 1) + ':\n' + paras.map(decodeXml).join('\n'));
+      const notesPath = 'ppt/notesSlides/notesSlide' + slides[i].match(/\d+/)[0] + '.xml';
+      if (zip.file(notesPath)) {
+        const nx = await zip.file(notesPath).async('string');
+        const nt = (nx.match(/<a:t>([^<]*)<\/a:t>/g) || []).map(t => decodeXml(t.replace(/<\/?a:t>/g, ''))).join(' ').trim();
+        if (nt && !/^\d+$/.test(nt)) out.push('(Teacher notes: ' + nt + ')');
+      }
+    }
+    return out.join('\n\n');
+  }
+  if (name.endsWith('.pdf')) {
+    await loadLib('pdf');
+    pdfjsLib.GlobalWorkerOptions.workerSrc = LIBS.pdfWorker;
+    const pdf = await pdfjsLib.getDocument({ data: await file.arrayBuffer() }).promise;
+    const pages = [];
+    for (let i = 1; i <= Math.min(pdf.numPages, 30); i++) {
+      const tc = await (await pdf.getPage(i)).getTextContent();
+      let line = '', lines = [], lastY = null;
+      tc.items.forEach(it => {
+        const y = Math.round(it.transform[5]);
+        if (lastY !== null && Math.abs(y - lastY) > 3) { lines.push(line); line = ''; }
+        line += it.str; lastY = y;
+      });
+      lines.push(line);
+      pages.push(lines.filter(l => l.trim()).join('\n'));
+    }
+    return pages.join('\n\n');
+  }
+  if (/\.(txt|md|csv|html?)$/.test(name)) {
+    const t = await file.text();
+    return name.match(/\.html?$/) ? new DOMParser().parseFromString(t, 'text/html').body.innerText : t;
+  }
+  if (name.endsWith('.doc') || name.endsWith('.ppt')) throw new Error('Older .doc and .ppt files cannot be read. Open the file and save it as .docx or .pptx, or copy and paste the text instead.');
+  throw new Error('That file type is not supported. Use .docx, .pptx, .pdf or .txt, or paste the text.');
+}
+function decodeXml(s) { return s.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&apos;/g, "'").replace(/&amp;/g, '&'); }
+function tidyText(t) { return t.replace(/\r/g, '').replace(/[ \t]+/g, ' ').replace(/\n{3,}/g, '\n\n').trim(); }
+
+/* ═════════ 2. ANONYMITY CHECK (runs locally before anything is sent) ═════════ */
+const PII_RULES = [
+  { label: 'Email address', re: /[\w.+-]+@[\w-]+\.[\w.-]+/g },
+  { label: 'Phone number', re: /(?:\+44\s?|\b0)(?:\d[\s-]?){9,10}\b/g },
+  { label: 'Date (possible date of birth)', re: /\b\d{1,2}[\/.-]\d{1,2}[\/.-](?:19|20)?\d{2}\b/g },
+  { label: 'UPN or pupil number', re: /\b[A-Z]\d{12}\b|\b[A-Z]\d{11}[A-Z]\b/g },
+  { label: 'NHS or ULN style number', re: /\b\d{3}[\s-]?\d{3}[\s-]?\d{4}\b/g },
+  { label: 'Postcode', re: /\b[A-Z]{1,2}\d[A-Z\d]?\s?\d[A-Z]{2}\b/g },
+  { label: 'Labelled personal detail', re: /\b(?:name|pupil|student|learner|child|dob|d\.o\.b|date of birth|address|parent|carer)\s*:\s*[^\n]{2,40}/gi }
+];
+function scanPersonal(text, extraTerms = []) {
+  const found = [];
+  PII_RULES.forEach(r => { (text.match(r.re) || []).forEach(m => found.push({ label: r.label, value: m.trim() })); });
+  extraTerms.filter(t => t && t.trim().length >= 2).forEach(t => {
+    const re = new RegExp('\\b' + t.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'gi');
+    (text.match(re) || []).forEach(m => found.push({ label: 'Learner reference you typed', value: m }));
+  });
+  const seen = new Set();
+  return found.filter(f => { const k = f.label + f.value; if (seen.has(k)) return false; seen.add(k); return true; });
+}
+function redact(text, findings) {
+  let t = text;
+  // longest first, so a whole labelled line is removed before a date inside it
+  [...findings].sort((a, b) => b.value.length - a.value.length).forEach(f => {
+    if (f.label === 'Labelled personal detail') {
+      const lab = f.value.split(':')[0];
+      t = t.split(f.value).join(lab + ': [removed]');
+    } else t = t.split(f.value).join('[removed]');
+  });
+  return t;
+}
+/* Shows a modal and resolves with the (possibly redacted) text, or null if the teacher goes back. */
+function privacyGate(text, extraTerms = []) {
+  const findings = scanPersonal(text, extraTerms);
+  if (!findings.length) return Promise.resolve(text);
+  return new Promise(resolve => {
+    const m = document.createElement('div');
+    m.className = 'modal-wrap';
+    m.innerHTML = `<div class="modal">
+      <div class="modal-icon">🛡️</div>
+      <h3>Before anything is sent</h3>
+      <p>We spotted ${findings.length} thing${findings.length > 1 ? 's' : ''} that could identify a person. These tools are anonymous by design, so we recommend removing ${findings.length > 1 ? 'them' : 'it'}.</p>
+      <ul class="pii-list">${findings.slice(0, 12).map(f => `<li><span>${esc(f.label)}</span><code>${esc(f.value.length > 46 ? f.value.slice(0, 46) + '…' : f.value)}</code></li>`).join('')}${findings.length > 12 ? `<li><span>and ${findings.length - 12} more</span></li>` : ''}</ul>
+      <div class="btn-row">
+        <button class="btn primary" data-a="redact">Remove and continue</button>
+        <button class="btn ghost" data-a="keep">They are fine, continue</button>
+        <button class="btn ghost" data-a="back">Go back</button>
+      </div></div>`;
+    document.body.appendChild(m);
+    m.addEventListener('click', e => {
+      const a = e.target.dataset.a; if (!a) return;
+      m.remove();
+      resolve(a === 'redact' ? redact(text, findings) : a === 'keep' ? text : null);
+    });
+  });
+}
+
+/* ═════════ 3. AI CALL (same /api/anthropic function as the PLIMS Builder) ═════════ */
+async function askClaude(prompt, maxTokens = 900, tries = 2) {
+  let lastErr;
+  for (let i = 0; i < tries; i++) {
+    try {
+      const resp = await fetch('/api/anthropic', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ model: MODEL, max_tokens: maxTokens, messages: [{ role: 'user', content: prompt }] })
+      });
+      if (resp.status === 502 || resp.status === 504) throw new Error('The server took too long to answer');
+      let data;
+      try { data = await resp.json(); } catch (_) { throw new Error('Unexpected reply from the server (' + resp.status + ')'); }
+      if (!resp.ok) throw new Error(data.error?.message || 'API error ' + resp.status);
+      const raw = data.content.filter(b => b.type === 'text').map(b => b.text).join('');
+      return parseJSON(raw);
+    } catch (e) { lastErr = e; await new Promise(r => setTimeout(r, 700)); }
+  }
+  throw lastErr;
+}
+function parseJSON(raw) {
+  let s = raw.replace(/```json|```/g, '').trim();
+  const a = s.indexOf('{'), b = s.lastIndexOf('}');
+  if (a > -1 && b > a) s = s.slice(a, b + 1);
+  return JSON.parse(s);
+}
+const STYLE_RULES = `Writing rules: warm, plain British English. Never use deficit language about young people. Never label ability or literacy level on pupil-facing text. Never use a dash as mid-sentence punctuation; use commas or full stops. Compound-word hyphens are fine.`;
+
+/* ═════════ 4. GRAPHICS: chevrons, header bars, faces (drawn on canvas) ═════════ */
+const FONT = '"Plus Jakarta Sans", "Segoe UI", Arial, sans-serif';
+let _fontsReady = null;
+function fontsReady() {
+  if (!_fontsReady) _fontsReady = Promise.all([
+    document.fonts.load('800 40px "Plus Jakarta Sans"'), document.fonts.load('700 40px "Plus Jakarta Sans"')
+  ]).catch(() => {}).then(() => document.fonts.ready);
+  return _fontsReady;
+}
+const _imgCache = {};
+function loadImg(src) {
+  if (!_imgCache[src]) _imgCache[src] = new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = src; });
+  return _imgCache[src];
+}
+function chevPath(ctx, x, y, w, h, notch, first) {
+  const tip = h * 0.42;
+  ctx.beginPath();
+  ctx.moveTo(x, y); ctx.lineTo(x + w - tip, y); ctx.lineTo(x + w, y + h / 2);
+  ctx.lineTo(x + w - tip, y + h); ctx.lineTo(x, y + h);
+  if (!first && notch) ctx.lineTo(x + tip, y + h / 2);
+  ctx.closePath();
+}
+/* opts: { label, icon:bool, first:bool, numbered:bool } */
+async function drawChevron(phase, opts = {}) {
+  await fontsReady();
+  const S = 3, h = 64 * S, label = opts.label || ((opts.numbered ? phase.num + '. ' : '') + phase.name);
+  const c = document.createElement('canvas'), ctx = c.getContext('2d');
+  ctx.font = `800 ${26 * S}px ${FONT}`;
+  const tw = ctx.measureText(label).width;
+  const iconW = opts.icon ? h * 0.86 : 0;
+  const tip = h * 0.42, pad = 22 * S;
+  const w = Math.max(200 * S, tw + pad * 2 + tip + (opts.first === false ? tip * 0.6 : 0) + (iconW ? iconW + 10 * S : 0));
+  c.width = w; c.height = h;
+  ctx.fillStyle = phase.hex; chevPath(ctx, 0, 0, w, h, true, opts.first !== false);
+  ctx.fill();
+  let x = (opts.first === false ? tip * 0.9 : 0) + pad * 0.8;
+  if (iconW) {
+    const im = await loadImg(ICONS[phase.key]);
+    ctx.save(); ctx.fillStyle = 'rgba(255,255,255,0.95)'; roundRect(ctx, x - 4 * S, (h - iconW) / 2 - 4 * S, iconW + 8 * S, iconW + 8 * S, 12 * S); ctx.fill(); ctx.restore();
+    ctx.drawImage(im, x, (h - iconW) / 2, iconW, iconW); x += iconW + 14 * S;
+  }
+  ctx.font = `800 ${26 * S}px ${FONT}`; ctx.fillStyle = '#fff'; ctx.textBaseline = 'middle';
+  ctx.fillText(label, x, h / 2 + 2 * S);
+  return c.toDataURL('image/png');
+}
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+}
+/* Full-width phase header band with icon left and right, as in the DELBAR worksheets */
+async function drawHeaderBar(phase, text) {
+  await fontsReady();
+  const S = 2, w = 900 * S, h = 84 * S, ic = 66 * S;
+  const c = document.createElement('canvas'); c.width = w; c.height = h;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = phase.hex; roundRect(ctx, 0, 0, w, h, 14 * S); ctx.fill();
+  const im = await loadImg(ICONS[phase.key]);
+  [9 * S, w - ic - 9 * S].forEach(x => {
+    ctx.fillStyle = '#fff'; roundRect(ctx, x - 3 * S, (h - ic) / 2 - 3 * S, ic + 6 * S, ic + 6 * S, 12 * S); ctx.fill();
+    ctx.drawImage(im, x, (h - ic) / 2, ic, ic);
+  });
+  ctx.fillStyle = '#fff'; ctx.textBaseline = 'middle';
+  ctx.font = `800 ${30 * S}px ${FONT}`;
+  const head = phase.num + '. ' + phase.name;
+  const hx = ic + 34 * S;
+  ctx.fillText(head, hx, h / 2 + 2 * S);
+  if (text) {
+    const hw = ctx.measureText(head).width;
+    ctx.font = `600 ${24 * S}px ${FONT}`;
+    let t = text; const max = w - hx - hw - ic - 70 * S;
+    while (ctx.measureText('·  ' + t).width > max && t.length > 4) t = t.slice(0, -2);
+    if (t !== text) t = t.trim() + '…';
+    ctx.globalAlpha = 0.95; ctx.fillText('·  ' + t, hx + hw + 18 * S, h / 2 + 2 * S); ctx.globalAlpha = 1;
+  }
+  return c.toDataURL('image/png');
+}
+async function drawJourney(numbered = false) {
+  const imgs = [];
+  for (let i = 0; i < PHASES.length; i++) imgs.push(await loadImg(await drawChevron(PHASES[i], { icon: true, first: i === 0, numbered })));
+  const gap = -18, h = imgs[0].height, w = imgs.reduce((s, im) => s + im.width + gap, -gap);
+  const c = document.createElement('canvas'); c.width = w; c.height = h;
+  const ctx = c.getContext('2d'); let x = 0;
+  imgs.forEach(im => { ctx.drawImage(im, x, 0); x += im.width + gap; });
+  return c.toDataURL('image/png');
+}
+async function drawIcon(phase, size = 360) {
+  const c = document.createElement('canvas'); c.width = c.height = size;
+  c.getContext('2d').drawImage(await loadImg(ICONS[phase.key]), 0, 0, size, size);
+  return c.toDataURL('image/png');
+}
+/* Three faces for pupil self-rating: yes, partly, not yet */
+function drawFace(kind, size = 120) {
+  const c = document.createElement('canvas'); c.width = c.height = size;
+  const g = c.getContext('2d'), r = size / 2 - 4;
+  const fill = { yes: '#CFE8D5', partly: '#F8E7B5', notyet: '#F3D4C8' }[kind];
+  g.fillStyle = fill; g.strokeStyle = '#1c1917'; g.lineWidth = size / 24;
+  g.beginPath(); g.arc(size / 2, size / 2, r, 0, Math.PI * 2); g.fill(); g.stroke();
+  g.fillStyle = '#1c1917';
+  [0.36, 0.64].forEach(x => { g.beginPath(); g.arc(size * x, size * 0.4, size / 18, 0, Math.PI * 2); g.fill(); });
+  g.beginPath(); g.lineCap = 'round';
+  if (kind === 'yes') g.arc(size / 2, size * 0.55, size * 0.2, 0.15 * Math.PI, 0.85 * Math.PI);
+  else if (kind === 'partly') { g.moveTo(size * 0.33, size * 0.68); g.lineTo(size * 0.67, size * 0.68); }
+  else g.arc(size / 2, size * 0.82, size * 0.2, 1.2 * Math.PI, 1.8 * Math.PI);
+  g.stroke();
+  return c.toDataURL('image/png');
+}
+async function copyImage(dataURL) {
+  const blob = await (await fetch(dataURL)).blob();
+  await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+}
+
+/* ═════════ 5. HTML RENDERERS (preview + print) ═════════ */
+function chevronHTML(p, label) {
+  return `<span class="chev" style="--c:${p.hex}"><img src="${ICONS[p.key]}" alt="">${esc(label || p.name)}</span>`;
+}
+const FACES_HTML = () => `<span class="faces"><img src="${drawFace('yes')}" alt="Yes"><img src="${drawFace('partly')}" alt="Partly"><img src="${drawFace('notyet')}" alt="Not yet"></span>`;
+
+/* lesson: {title, keywords[], phases:[{key,title,minutes,pupil_lines[],tasks[{text,lines}],starters[],teacher_note,board_card,learning,added}]}
+   opts: {teacher:bool, targets:{phaseKey:{pupil_text}}, learner:string} */
+function renderWorksheet(lesson, opts = {}) {
+  const kw = (lesson.keywords || []).length ? `<div class="ws-words"><div class="ws-words-h">Word bank</div>${lesson.keywords.map(k => `<div class="ws-word"><span class="ws-emoji">${esc(k.emoji || '•')}</span><b>${esc(k.word)}</b><span>${esc(k.meaning || '')}</span></div>`).join('')}</div>` : '';
+  const blocks = lesson.phases.map(ph => {
+    const p = PHASE[ph.key]; const tg = opts.targets?.[ph.key];
+    const tasks = (ph.tasks || []).map((t, i) => `<div class="ws-task"><div class="ws-task-t"><span class="ws-num" style="background:${p.hex}">${i + 1}</span>${esc(t.text)}</div>${Array.from({ length: Math.max(0, Math.min(6, t.lines ?? 2)) }, () => '<div class="ws-line"></div>').join('')}</div>`).join('');
+    return `<section class="ws-phase" style="--c:${p.hex};--l:${p.light}">
+      <header class="ws-head"><img src="${ICONS[p.key]}" alt=""><div><b>${p.num}. ${p.name}</b>${ph.title ? `<span> · ${esc(ph.title)}</span>` : ''}</div>${ph.minutes ? `<em>${esc(ph.minutes)} min</em>` : ''}<img src="${ICONS[p.key]}" alt=""></header>
+      <div class="ws-body">
+        ${tg ? `<div class="ws-target">⭐ <b>My target:</b> ${esc(tg.pupil_text)}</div>` : ''}
+        ${(ph.pupil_lines || []).length ? `<div class="ws-say">${ph.pupil_lines.map(l => `<div>${esc(l)}</div>`).join('')}</div>` : ''}
+        ${tasks}
+        ${(ph.starters || []).length ? `<div class="ws-starters"><b>Sentence starters</b>${ph.starters.map(s => `<div>“${esc(s)}…”</div>`).join('')}</div>` : ''}
+        ${ph.key === 'review' && opts.targets && Object.keys(opts.targets).length ? `<div class="ws-rate"><b>How did I do with my targets?</b>${Object.entries(opts.targets).map(([k, t]) => `<div class="ws-rate-row">${chevronHTML(PHASE[k])}<span>${esc(t.pupil_text)}</span>${FACES_HTML()}</div>`).join('')}</div>` : ''}
+        ${opts.teacher && ph.teacher_note ? `<div class="ws-teacher"><b>Teacher notes${ph.added ? ' · phase added by the tool' : ''}</b>${esc(ph.teacher_note)}</div>` : ''}
+      </div></section>`;
+  }).join('');
+  return `<div class="ws">
+    <div class="ws-top"><h1>${esc(lesson.title || 'Lesson')}</h1><div class="ws-meta">${opts.learner ? `<span>Learner: <b>${esc(opts.learner)}</b></span>` : '<span>Name: ________________</span>'}<span>Date: ____________</span></div></div>
+    <div class="ws-journey">${PHASES.map(p => chevronHTML(p)).join('')}</div>
+    ${kw}${blocks}</div>`;
+}
+/* Task management board: one column per phase, with tick box and "I am learning to" */
+function renderBoard(lesson, opts = {}) {
+  const cols = lesson.phases.map(ph => {
+    const p = PHASE[ph.key]; const tg = opts.targets?.[ph.key];
+    return `<div class="tb-col" style="--c:${p.hex};--l:${p.light}">
+      <div class="tb-head"><img src="${ICONS[p.key]}" alt=""><b>${p.num}. ${p.name}</b></div>
+      <div class="tb-card"><div class="tb-task">${esc(ph.board_card || ph.title || '')}</div>
+      ${tg ? `<div class="tb-target">⭐ ${esc(tg.pupil_text)}</div>` : ''}
+      <div class="tb-done"><span class="tb-box"></span>Done</div></div>
+      <div class="tb-learn">${esc(ph.learning || '')}</div></div>`;
+  }).join('');
+  return `<div class="tb"><div class="tb-top"><h2>${esc(lesson.title || 'Lesson')}</h2><span>${opts.learner ? 'Learner: <b>' + esc(opts.learner) + '</b> · ' : ''}My task board</span></div><div class="tb-grid">${cols}</div></div>`;
+}
+
+/* Print any rendered output on its own (teacher saves as PDF from the print dialog) */
+function printHTML(html, title, landscape) {
+  const css = $('#out-css').textContent;
+  const w = window.open('', '_blank');
+  if (!w) { toast('Allow pop-ups to print'); return; }
+  w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>${esc(title)}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Lora:wght@600;700&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>${css}@page{size:A4 ${landscape ? 'landscape' : 'portrait'};margin:12mm}body{margin:0;background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}</style></head><body>${html}
+  <script>document.fonts.ready.then(()=>setTimeout(()=>window.print(),400))<\/script></body></html>`);
+  w.document.close();
+}
+
+/* ═════════ 6. WORD (.docx) EXPORT, opens in Word and Google Docs ═════════ */
+async function buildDocx(lesson, opts = {}) {
+  await loadLib('docx');
+  const D = window.docx;
+  const { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, ImageRun, WidthType, ShadingType, BorderStyle, AlignmentType, VerticalAlign } = D;
+  const hx = h => h.replace('#', '');
+  const none = { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' };
+  const W = 10466; // A4 width minus 2 × 720 twip margins
+  const bordersOf = col => ({ top: { style: BorderStyle.SINGLE, size: 8, color: col }, bottom: { style: BorderStyle.SINGLE, size: 8, color: col }, left: { style: BorderStyle.SINGLE, size: 8, color: col }, right: { style: BorderStyle.SINGLE, size: 8, color: col } });
+  const img = (url, w, h) => new ImageRun({ type: 'png', data: dataURLtoBytes(url), transformation: { width: w, height: h } });
+  const P = (text, o = {}) => new Paragraph({ spacing: { after: o.after ?? 80, before: o.before ?? 0 }, keepNext: o.keepNext, shading: o.fill ? { type: ShadingType.CLEAR, fill: o.fill, color: 'auto' } : undefined, alignment: o.align, children: Array.isArray(text) ? text : [new TextRun({ text, size: o.size || 24, bold: o.bold, italics: o.italic, color: o.color, font: 'Arial' })] });
+  // writing lines as a borderless table, because Word merges stacked paragraph borders into one
+  const lines = n => new Table({ width: { size: W - 700, type: WidthType.DXA }, columnWidths: [W - 700], indent: { size: 300, type: WidthType.DXA },
+    rows: Array.from({ length: n }, () => new TableRow({ height: { value: 440, rule: 'atLeast' }, children: [new TableCell({ borders: { top: none, left: none, right: none, bottom: { style: BorderStyle.SINGLE, size: 6, color: 'A8A29E' } }, children: [new Paragraph({ children: [] })] })] })) });
+  const faces = ['yes', 'partly', 'notyet'].map(k => drawFace(k, 90));
+
+  const children = [];
+  children.push(P(lesson.title || 'Lesson', { size: 40, bold: true, after: 60 }));
+  children.push(P(opts.learner ? `Learner: ${opts.learner}          Date: ____________` : 'Name: ______________________          Date: ____________', { size: 22, color: '57534E', after: 160 }));
+  const journey = await drawJourney();
+  const jImg = await loadImg(journey);
+  children.push(new Paragraph({ spacing: { after: 200 }, children: [img(journey, 690, Math.round(690 * jImg.height / jImg.width))] }));
+
+  if ((lesson.keywords || []).length) {
+    children.push(new Table({
+      width: { size: W, type: WidthType.DXA }, columnWidths: [W],
+      rows: [new TableRow({ cantSplit: true, children: [new TableCell({ borders: bordersOf('D4A017'), shading: { type: ShadingType.CLEAR, fill: 'FDF6E3', color: 'auto' }, margins: { top: 100, bottom: 100, left: 160, right: 160 },
+        children: [P('Word bank', { bold: true, size: 24 }), ...lesson.keywords.map(k => P([new TextRun({ text: (k.emoji ? k.emoji + '  ' : '') + k.word, bold: true, size: 24, font: 'Arial' }), new TextRun({ text: k.meaning ? '   ' + k.meaning : '', size: 22, color: '57534E', font: 'Arial' })], { after: 40 }))] })] })]
+    }));
+    children.push(P('', { after: 160 }));
+  }
+
+  for (const ph of lesson.phases) {
+    const p = PHASE[ph.key], col = hx(p.hex), tg = opts.targets?.[ph.key];
+    const icon = ICONS[p.key];
+    const headCell = (kids, w) => new TableCell({ width: { size: w, type: WidthType.DXA }, borders: bordersOf(col), shading: { type: ShadingType.CLEAR, fill: col, color: 'auto' }, verticalAlign: VerticalAlign.CENTER, margins: { top: 60, bottom: 60, left: 80, right: 80 }, children: kids });
+    const body = [];
+    if (tg) body.push(P('⭐ My target: ' + tg.pupil_text, { bold: true, fill: hx(p.light), size: 24, after: 120 }));
+    (ph.pupil_lines || []).forEach(l => body.push(P(l, { size: 28, bold: true, after: 40 })));
+    if ((ph.pupil_lines || []).length) body.push(P('', { after: 60 }));
+    (ph.tasks || []).forEach((t, i) => {
+      body.push(P([new TextRun({ text: (i + 1) + '.  ', bold: true, color: col, size: 24, font: 'Arial' }), new TextRun({ text: t.text, size: 24, font: 'Arial' })], { after: 40 }));
+      const n = Math.max(0, Math.min(6, t.lines ?? 2));
+      if (n) body.push(lines(n));
+      body.push(P('', { after: 80 }));
+    });
+    if ((ph.starters || []).length) {
+      body.push(P('Sentence starters', { bold: true, size: 22, fill: 'F5F5F4', after: 0 }));
+      ph.starters.forEach(s => body.push(P('“' + s + '…”', { italic: true, size: 22, fill: 'F5F5F4', after: 0 })));
+      body.push(P('', { after: 80 }));
+    }
+    if (ph.key === 'review' && opts.targets && Object.keys(opts.targets).length) {
+      body.push(P('How did I do with my targets?', { bold: true, size: 24, before: 60 }));
+      Object.entries(opts.targets).forEach(([k, t]) => body.push(new Paragraph({ spacing: { after: 80 }, children: [new TextRun({ text: PHASE[k].name + ':  ' + t.pupil_text + '     ', size: 22, font: 'Arial' }), ...faces.map(f => img(f, 26, 26)), new TextRun({ text: '' })] })));
+    }
+    if (opts.teacher && ph.teacher_note) body.push(P('Teacher notes' + (ph.added ? ' (phase added by the tool): ' : ': ') + ph.teacher_note, { size: 20, fill: 'E7E5E4', color: '44403C', before: 80 }));
+    if (!body.length) body.push(P(''));
+
+    const head = new Table({
+      width: { size: W, type: WidthType.DXA }, columnWidths: [900, W - 1800, 900],
+      rows: [new TableRow({ children: [
+        headCell([new Paragraph({ alignment: AlignmentType.CENTER, children: [img(icon, 40, 40)] })], 900),
+        headCell([P([new TextRun({ text: `${p.num}. ${p.name}`, bold: true, size: 30, color: 'FFFFFF', font: 'Arial' }), new TextRun({ text: ph.title ? '  ·  ' + ph.title : '', size: 24, color: 'FFFFFF', font: 'Arial' }), new TextRun({ text: ph.minutes ? '   (' + ph.minutes + ' min)' : '', size: 20, color: 'FFFFFF', font: 'Arial' })], { after: 0 })], W - 1800),
+        headCell([new Paragraph({ alignment: AlignmentType.CENTER, children: [img(icon, 40, 40)] })], 900)
+      ] })]
+    });
+    const inner = new Table({ width: { size: W, type: WidthType.DXA }, columnWidths: [W],
+      rows: [new TableRow({ children: [new TableCell({ borders: { top: none, left: none, right: none, bottom: none }, margins: { top: 140, bottom: 140, left: 200, right: 200 }, children: body })] })] });
+    // one unsplittable row holds the whole phase, so a header never sits alone at the foot of a page
+    children.push(new Table({
+      width: { size: W, type: WidthType.DXA }, columnWidths: [W],
+      rows: [new TableRow({ cantSplit: true, children: [new TableCell({ borders: bordersOf(col), margins: { top: 0, bottom: 0, left: 0, right: 0 }, children: [head, inner, new Paragraph({ spacing: { after: 0 }, children: [] })] })] })]
+    }));
+    children.push(P('', { after: 200 }));
+  }
+  const doc = new Document({ creator: 'The Curiosity Curriculum', title: lesson.title, sections: [{ properties: { page: { size: { width: 11906, height: 16838 }, margin: { top: 720, bottom: 720, left: 720, right: 720 } } }, children }] });
+  return Packer.toBlob(doc);
+}
+
+/* ═════════ 7. POWERPOINT (.pptx) EXPORT, opens in PowerPoint and Google Slides ═════════ */
+const PPT_BG = 'FAF6EF', PPT_INK = '1C1917';
+async function pptChevron(pptx, slide, p, x, y, w, h, label) {
+  slide.addShape(pptx.ShapeType.chevron, { x, y, w, h, fill: { color: p.hex.slice(1) }, line: { color: p.hex.slice(1), width: 0 } });
+  slide.addText(label || p.name, { x: x + h * 0.2, y, w: w - h * 0.5, h, fontFace: 'Arial', fontSize: 13, bold: true, color: 'FFFFFF', align: 'center', valign: 'middle', margin: 0 });
+}
+function addBoardSlides(pptx, lesson, opts = {}) {
+  // Slide A: task board columns
+  const s = pptx.addSlide(); s.background = { color: PPT_BG };
+  s.addText((lesson.title || 'Lesson') + (opts.learner ? '  ·  ' + opts.learner : ''), { x: 0.3, y: 0.15, w: 7.6, h: 0.45, fontFace: 'Georgia', fontSize: 20, bold: true, color: PPT_INK });
+  s.addText('My task board', { x: 7.6, y: 0.18, w: 2.1, h: 0.4, fontFace: 'Arial', fontSize: 12, color: '57534E', align: 'right' });
+  const n = lesson.phases.length, gap = 0.1, cw = (9.4 - gap * (n - 1)) / n;
+  lesson.phases.forEach((ph, i) => {
+    const p = PHASE[ph.key], x = 0.3 + i * (cw + gap), tg = opts.targets?.[ph.key];
+    s.addShape(pptx.ShapeType.roundRect, { x, y: 0.75, w: cw, h: 4.65, fill: { color: p.light.slice(1) }, line: { color: p.hex.slice(1), width: 1.5 }, rectRadius: 0.08 });
+    s.addShape(pptx.ShapeType.rect, { x, y: 0.75, w: cw, h: 0.95, fill: { color: p.hex.slice(1) }, line: { color: p.hex.slice(1), width: 0 } });
+    s.addImage({ data: ICONS[p.key], x: x + cw / 2 - 0.27, y: 0.8, w: 0.54, h: 0.54 });
+    s.addText(`${p.num}. ${p.name}`, { x, y: 1.33, w: cw, h: 0.34, fontFace: 'Arial', fontSize: 12, bold: true, color: 'FFFFFF', align: 'center', margin: 0 });
+    s.addShape(pptx.ShapeType.roundRect, { x: x + 0.08, y: 1.8, w: cw - 0.16, h: tg ? 1.55 : 2.25, fill: { color: 'FFFFFF' }, line: { color: 'E7E0D8', width: 1 }, rectRadius: 0.06 });
+    s.addText(ph.board_card || ph.title || '', { x: x + 0.12, y: 1.85, w: cw - 0.24, h: tg ? 1.45 : 2.15, fontFace: 'Arial', fontSize: 12, bold: true, color: PPT_INK, valign: 'top', fit: 'shrink' });
+    if (tg) s.addText('⭐ ' + tg.pupil_text, { x: x + 0.08, y: 3.42, w: cw - 0.16, h: 0.85, fontFace: 'Arial', fontSize: 10, bold: true, color: PPT_INK, fill: { color: 'FDF6E3' }, line: { color: 'D4A017', width: 1 }, valign: 'middle', fit: 'shrink' });
+    s.addShape(pptx.ShapeType.rect, { x: x + 0.15, y: 4.45, w: 0.32, h: 0.32, fill: { color: 'FFFFFF' }, line: { color: PPT_INK, width: 1.25 } });
+    s.addText('Done', { x: x + 0.52, y: 4.45, w: cw - 0.6, h: 0.32, fontFace: 'Arial', fontSize: 12, bold: true, color: PPT_INK, valign: 'middle', margin: 0 });
+    s.addText(String(ph.learning || ''), { x: x + 0.06, y: 4.82, w: cw - 0.12, h: 0.55, fontFace: 'Arial', fontSize: 8, italic: true, color: '57534E', valign: 'top', fit: 'shrink' });
+  });
+  // Slide B: pupil guide, "I am learning to…" per phase
+  const g = pptx.addSlide(); g.background = { color: PPT_BG };
+  g.addText('What I am learning today', { x: 0.4, y: 0.2, w: 9.2, h: 0.5, fontFace: 'Georgia', fontSize: 22, bold: true, color: PPT_INK });
+  lesson.phases.forEach((ph, i) => {
+    const p = PHASE[ph.key], y = 0.85 + i * 0.75;
+    g.addImage({ data: ICONS[p.key], x: 0.4, y, w: 0.6, h: 0.6 });
+    pptChevron(pptx, g, p, 1.1, y + 0.1, 1.85, 0.4);
+    g.addText(String(ph.learning || ''), { x: 3.1, y, w: 6.5, h: 0.6, fontFace: 'Arial', fontSize: 15, color: PPT_INK, valign: 'middle', fit: 'shrink' });
+  });
+}
+async function buildPptx(lesson, opts = {}) {
+  await loadLib('pptx');
+  const pptx = new PptxGenJS(); pptx.layout = 'LAYOUT_16x9'; pptx.title = lesson.title || 'Lesson';
+  if (!opts.boardOnly) {
+    const t = pptx.addSlide(); t.background = { color: PPT_BG };
+    t.addText(lesson.title || 'Lesson', { x: 0.6, y: 1.3, w: 8.8, h: 1.2, fontFace: 'Georgia', fontSize: 36, bold: true, color: PPT_INK });
+    if ((lesson.keywords || []).length) t.addText('Key words: ' + lesson.keywords.map(k => k.word).join(' · '), { x: 0.6, y: 2.5, w: 8.8, h: 0.5, fontFace: 'Arial', fontSize: 16, color: '57534E' });
+    const cw = 1.6;
+    PHASES.forEach((p, i) => {
+      const x = 0.45 + i * (cw - 0.05);
+      t.addImage({ data: ICONS[p.key], x: x + cw / 2 - 0.33, y: 3.55, w: 0.66, h: 0.66 });
+      pptChevron(pptx, t, p, x, 4.35, cw, 0.42);
+    });
+    for (const ph of lesson.phases) {
+      const p = PHASE[ph.key];
+      const s = pptx.addSlide(); s.background = { color: PPT_BG };
+      s.addShape(pptx.ShapeType.rect, { x: 0, y: 5.5, w: 10, h: 0.125, fill: { color: p.hex.slice(1) }, line: { color: p.hex.slice(1), width: 0 } });
+      s.addText(ph.title || p.name, { x: 0.4, y: 0.65, w: 8.5, h: 0.7, fontFace: 'Georgia', fontSize: 26, bold: true, color: PPT_INK });
+      let y = 1.45;
+      if ((ph.pupil_lines || []).length) {
+        const h = Math.min(1.6, 0.42 * ph.pupil_lines.length + 0.1);
+        s.addText(ph.pupil_lines.map(l => ({ text: l, options: { breakLine: true } })), { x: 0.4, y, w: 9.2, h, fontFace: 'Arial', fontSize: 22, bold: true, color: PPT_INK, valign: 'top', fit: 'shrink' });
+        y += h + 0.1;
+      }
+      const tasks = (ph.tasks || []).map((tk, i) => ({ text: (i + 1) + '.  ' + tk.text, options: { breakLine: true, paraSpaceAfter: 6 } }));
+      const stH = (ph.starters || []).length ? 0.9 : 0;
+      if (tasks.length) {
+        const h = Math.max(0.6, 5.3 - y - stH - 0.1);
+        s.addText(tasks, { x: 0.4, y, w: 9.2, h, fontFace: 'Arial', fontSize: 16, color: PPT_INK, valign: 'top', fit: 'shrink' });
+      }
+      if (stH) s.addText([{ text: 'Sentence starters:  ', options: { bold: true } }, { text: ph.starters.map(x => '“' + x + '…”').join('    ') }], { x: 0.4, y: 5.3 - stH, w: 9.2, h: stH - 0.1, fontFace: 'Arial', fontSize: 14, color: PPT_INK, fill: { color: p.light.slice(1) }, valign: 'middle', fit: 'shrink', margin: 8 });
+      if (ph.teacher_note) s.addNotes(ph.teacher_note);
+      // badge and icon last so they sit in front of everything else
+      s.addShape(pptx.ShapeType.rect, { x: 9.05, y: 0.0, w: 0.92, h: 0.9, fill: { color: PPT_BG }, line: { color: PPT_BG, width: 0 } });
+      s.addImage({ data: ICONS[p.key], x: 9.13, y: 0.05, w: 0.76, h: 0.76 });
+      await pptChevron(pptx, s, p, 0.12, 0.12, 1.85, 0.38);
+    }
+  }
+  addBoardSlides(pptx, lesson, opts);
+  return pptx.write({ outputType: 'blob' });
+}
+
+/* ═════════ 8. HAND-OFF BETWEEN TOOLS (this tab only, cleared when it closes) ═════════ */
+const HANDOFF = {
+  put(k, v) { try { sessionStorage.setItem('cc_' + k, JSON.stringify(v)); } catch (_) {} },
+  get(k) { try { return JSON.parse(sessionStorage.getItem('cc_' + k) || 'null'); } catch (_) { return null; } },
+  clear(k) { try { sessionStorage.removeItem('cc_' + k); } catch (_) {} }
+};
+
+/* ═════════ 9. SHARED UPLOAD WIDGET ═════════ */
+function wireUpload(root, onText) {
+  const drop = $('.drop', root), input = $('input[type=file]', root), ta = $('textarea.paste', root), status = $('.file-status', root);
+  $$('.src-tab', root).forEach(b => b.onclick = () => {
+    $$('.src-tab', root).forEach(x => x.classList.toggle('active', x === b));
+    $$('.src-pane', root).forEach(x => x.classList.toggle('active', x.dataset.pane === b.dataset.pane));
+  });
+  const handle = async file => {
+    status.className = 'file-status busy'; status.textContent = 'Reading ' + file.name + ' in your browser…';
+    try {
+      const t = tidyText(await extractText(file));
+      if (t.length < 20) throw new Error('No readable text found. If it is a scanned PDF or an image-only slide deck, paste the text instead.');
+      ta.value = t; onText && onText(t);
+      status.className = 'file-status ok'; status.textContent = `✓ ${file.name} read on this device (${t.split(/\s+/).length} words). Check or edit the text in the "Paste text" tab.`;
+    } catch (e) { status.className = 'file-status err'; status.textContent = e.message; }
+  };
+  input.onchange = () => input.files[0] && handle(input.files[0]);
+  drop.ondragover = e => { e.preventDefault(); drop.classList.add('over'); };
+  drop.ondragleave = () => drop.classList.remove('over');
+  drop.ondrop = e => { e.preventDefault(); drop.classList.remove('over'); e.dataTransfer.files[0] && handle(e.dataTransfer.files[0]); };
+  return () => ta.value.trim();
+}
+
+
+/* ═════════ PAGE: PLIM MAPPER ═════════ */
+let TARGETS = [];     // {id, domain, text, private}
+let LESSON = HANDOFF.get('lesson');   // full DELBAR lesson from the Wrapper, if any
+let ACTIVE = null;    // lesson used for outputs (full or lite)
+let MAPS = [];        // {phase, id, activity, look_for, prompt, pupil_text, tweak}
+
+$('#hero-journey').innerHTML = PHASES.map(p => chevronHTML(p)).join('');
+
+/* ── PLIM parsing ── */
+const DOMAIN_IDS = { 'my health': 'H', 'health': 'H', 'my communication': 'C', 'communication': 'C', 'my independence': 'I', 'independence': 'I', 'my community': 'CM', 'community': 'CM' };
+function domainPrefix(name, used) {
+  const k = name.toLowerCase().trim();
+  let p = DOMAIN_IDS[k];
+  if (!p) { const w = k.replace(/^my\s+/, '').split(/\s+/).filter(Boolean); p = (w.length > 1 ? w[0][0] + w[1][0] : w[0].slice(0, 2)).toUpperCase(); }
+  let q = p, n = 2;
+  while (used[q] && used[q] !== name) q = p + n++;
+  used[q] = name; return q;
+}
+function titleCase(s) { return s.toLowerCase().replace(/\b\w/g, c => c.toUpperCase()); }
+function parsePLIM(text) {
+  const out = [], used = {}, count = {};
+  let domain = 'Targets';
+  text.split('\n').map(l => l.trim()).filter(Boolean).forEach(line => {
+    if (/^%|^\d+\s*%$/.test(line)) return;
+    const bullet = /^([-•*▪◦●–]|\d+[.)])\s*/.test(line);
+    const clean = line.replace(/^([-•*▪◦●–]|\d+[.)])\s*/, '').replace(/\s*\d+\s*%$/, '').trim();
+    if (!clean) return;
+    const isTarget = bullet || /^i\s+(can|will|am)\b/i.test(clean) || clean.split(/\s+/).length > 7 || /[.!?]$/.test(clean);
+    if (!isTarget) { domain = titleCase(clean.replace(/[:\-]+$/, '')); return; }
+    const pre = domainPrefix(domain, used);
+    count[pre] = (count[pre] || 0) + 1;
+    out.push({ id: pre + count[pre], domain, text: clean, private: false });
+  });
+  return out;
+}
+function renderTargets() {
+  const box = $('#targets');
+  if (!TARGETS.length) { box.innerHTML = ''; return; }
+  const groups = {};
+  TARGETS.forEach((t, i) => (groups[t.domain] = groups[t.domain] || []).push([t, i]));
+  box.innerHTML = `<div class="field-hint" style="margin-bottom:10px">Tick <b>Staff only</b> for anything personal, for example hygiene, anxiety, family or touch. It will never appear on pupil sheets.</div>` +
+    Object.entries(groups).map(([d, list]) => `<div class="t-group"><h4>${esc(d)} · ${list.length}</h4>${list.map(([t, i]) => `
+      <div class="t-row ${t.private ? 'private' : ''}" data-i="${i}">
+        <span class="t-id">${esc(t.id)}</span>
+        <input type="text" value="${esc(t.text)}" data-f="text">
+        <label class="t-priv"><input type="checkbox" data-f="private" ${t.private ? 'checked' : ''}> Staff only</label>
+        <button class="t-x" title="Remove">×</button></div>`).join('')}</div>`).join('');
+  $$('.t-row', box).forEach(row => {
+    const t = TARGETS[+row.dataset.i];
+    $('[data-f=text]', row).oninput = e => { t.text = e.target.value; };
+    $('[data-f=private]', row).onchange = e => { t.private = e.target.checked; row.classList.toggle('private', t.private); };
+    $('.t-x', row).onclick = () => { TARGETS.splice(+row.dataset.i, 1); renderTargets(); };
+  });
+}
+$('#read-plim').onclick = () => {
+  const keepPriv = new Set(TARGETS.filter(t => t.private).map(t => t.text));
+  TARGETS = parsePLIM($('#plim-text').value);
+  TARGETS.forEach(t => { if (keepPriv.has(t.text)) t.private = true; });
+  renderTargets();
+  if (!TARGETS.length) toast('No targets found. Put each target on its own line.');
+};
+$('#add-target').onclick = () => {
+  const domain = prompt('Which domain? e.g. My Health, My Communication, My Independence, My Community', TARGETS.at(-1)?.domain || 'My Health');
+  if (!domain) return;
+  const used = {}; TARGETS.forEach(t => used[t.id.replace(/\d+$/, '')] = t.domain);
+  const pre = domainPrefix(titleCase(domain), used);
+  const n = TARGETS.filter(t => t.id.replace(/\d+$/, '') === pre).length + 1;
+  TARGETS.push({ id: pre + n, domain: titleCase(domain), text: 'I can ', private: false });
+  renderTargets(); $$('#targets input[type=text]').at(-1)?.focus();
+};
+
+/* hand-off from the PLIMS Builder */
+const fromBuilder = HANDOFF.get('plim');
+if (fromBuilder) {
+  $('#plim-text').value = fromBuilder; $('#read-plim').click();
+  $('#plim-sub').innerHTML = '✓ Brought over from the <b>PLIMS Builder</b>. Check the targets and mark any that are staff only.';
+}
+
+/* ── lesson source ── */
+const getSource = wireUpload($('#src'));
+function showLessonIn() {
+  if (!LESSON) { $('#lesson-in').style.display = 'none'; $('#src-wrap').style.display = 'block'; return; }
+  $('#lesson-in').style.display = 'block'; $('#src-wrap').style.display = 'none';
+  $('#lesson-in').innerHTML = `<div class="lesson-in"><div class="field-hint" style="margin:0 0 4px">Using your DELBAR lesson from the Wrapper</div><b>${esc(LESSON.title)}</b>
+    <div style="margin:8px 0">${LESSON.phases.map(ph => chevronHTML(PHASE[ph.key], PHASE[ph.key].name)).join('')}</div>
+    <button class="btn small ghost" id="use-other">Use a different resource instead</button></div>`;
+  $('#use-other').onclick = () => { LESSON = null; HANDOFF.clear('lesson'); showLessonIn(); };
+}
+showLessonIn();
+
+/* ── generate ── */
+function setSteps(list) { $('#gen-steps').innerHTML = list.map((s, i) => `<div class="gen-step" id="gs-${i}"><span class="dot"></span>${esc(s)}</div>`).join(''); }
+function step(i, s) { const el = $('#gs-' + i); if (el) el.className = 'gen-step ' + s; }
+
+function lessonForPrompt(L) {
+  return L.phases.map(ph => `${ph.key} (${PHASE[ph.key].name}): ${ph.title || ''}. Pupil does: ${(ph.pupil_lines || []).join(' ')} Tasks: ${(ph.tasks || []).map(t => t.text).join(' / ')}`).join('\n');
+}
+
+$('#go').onclick = async () => {
+  $('#err').style.display = 'none';
+  if (!TARGETS.length) $('#read-plim').click();
+  const targets = TARGETS.filter(t => t.text.trim().length > 6);
+  if (targets.length < 2) { $('#err').textContent = 'Add at least two PLIM targets in Step 1 first.'; $('#err').style.display = 'block'; return; }
+  let lessonText = LESSON ? lessonForPrompt(LESSON) : getSource();
+  if (!LESSON && lessonText.length < 30) { $('#err').textContent = 'Add the lesson or resource in Step 2: upload a file or paste the text.'; $('#err').style.display = 'block'; return; }
+  if (lessonText.length > 12000) lessonText = lessonText.slice(0, 12000);
+
+  const learner = $('#learner').value.trim();
+  const targetText = targets.map(t => `${t.id} [${t.domain}]${t.private ? ' [STAFF ONLY]' : ''}: ${t.text}`).join('\n');
+  const checked = await privacyGate(targetText + '\n\n=====\n\n' + lessonText, learner ? [learner] : []);
+  if (checked === null) return;
+  const [safeTargets, safeLesson] = checked.split('\n\n=====\n\n');
+
+  $('#go').disabled = true; $('#gen').classList.add('show');
+  setSteps(['Reading the activities in each phase', 'Matching targets to activities', 'Building the map, strip and task board']);
+  step(0, 'done'); step(1, 'busy');
+  try {
+    const r = await askClaude(`You are an experienced UK teacher in a specialist SEMH setting. Map ONE learner's PLIM (Personalised Learning Intention Map) targets to the activities of ONE DELBAR lesson, for adaptive practice.
+
+PLIM targets (ID [domain]: target):
+${safeTargets}
+
+The lesson:
+${LESSON ? safeLesson : `This is the teacher's resource. First find the activity that fits each DELBAR phase, using the resource's own activities. If a phase is missing, name a short sensible activity for it.\n\n${safeLesson}`}
+
+DELBAR phases and the domains they usually suit (a starting point, not a rule):
+do_now: settles, starts independently, routine task. Independence (starting tasks, routines), Health (calm start, transitions)
+engage: reacts to a hook, shares a first thought. Communication (sharing ideas or feelings, joining in), Health (managing excitement or worry)
+learn: listens, takes in new content. Communication (listening, asking for clarification), Independence (staying on task)
+build: guided or paired practice. Community (turn-taking, cooperation, sharing), Communication (structured conversation)
+apply: independent task or choice. Independence (multi-step instructions, own choices), Health (coping when it gets hard)
+review: reflects, self-assesses. Independence (checking own work), Health or Communication (naming feelings, one achievement)
+
+Rules:
+1. At most one target per phase. Choose 3 to 5 mappings in total.
+2. Cover at least 3 different domains when the PLIM has them.
+3. The activity must genuinely give the learner the chance to show the target. If you cannot name the observable behaviour, pick another target or leave that phase unmapped.
+4. Fit the learner, using what their targets show about their priorities.
+5. Small tweaks to the activity are allowed (paired instead of solo, a visual choice board, a feelings check-in). Put the tweak in "tweak", or leave it empty.
+6. pupil_text starts "I can", 3 to 6 words, one idea, simple decodable words. For a STAFF ONLY target the pupil_text must be neutral and positive and must not name the private topic, for example "I can use my calm tool".
+7. look_for: the observable behaviour, 15 words or fewer. prompt: what an adult says or does, 15 words or fewer.
+8. Use the target IDs exactly as given.
+
+${STYLE_RULES}
+
+Respond ONLY with valid JSON, no preamble:
+{"title":"short lesson title","activities":{${PHASES.map(p => `"${p.key}":{"activity":"6 words or fewer","learning":"I am learning to …"}`).join(',')}},"mappings":[{"phase":"do_now","id":"I2","look_for":"","prompt":"","pupil_text":"","tweak":""}]}`, 1400);
+    step(1, 'done'); step(2, 'busy');
+
+    ACTIVE = LESSON ? LESSON : {
+      title: r.title || 'Lesson', keywords: [],
+      phases: PHASES.map(p => ({ key: p.key, title: r.activities?.[p.key]?.activity || '', board_card: r.activities?.[p.key]?.activity || '', learning: r.activities?.[p.key]?.learning || '' }))
+    };
+    const byId = Object.fromEntries(TARGETS.map(t => [t.id, t]));
+    const seen = new Set();
+    MAPS = (r.mappings || []).filter(m => byId[m.id] && PHASE[m.phase] && !seen.has(m.phase) && seen.add(m.phase))
+      .map(m => ({ ...m, activity: ACTIVE.phases.find(p => p.key === m.phase)?.title || r.activities?.[m.phase]?.activity || '' }))
+      .sort((a, b) => PHASE[a.phase].num - PHASE[b.phase].num);
+    if (!MAPS.length) throw new Error('No usable mappings came back');
+    showResults(); step(2, 'done');
+  } catch (e) {
+    $('#err').innerHTML = esc('Something went wrong: ' + e.message) + '<br>Please try again.';
+    $('#err').style.display = 'block'; step(1, 'fail');
+  } finally { $('#go').disabled = false; }
+};
+
+/* ── results ── */
+const targetOf = id => TARGETS.find(t => t.id === id);
+function pupilTargets() {
+  const o = {};
+  MAPS.forEach(m => { const t = targetOf(m.id); if (t) o[m.phase] = { pupil_text: m.pupil_text || (t.private ? 'I can use my strategy.' : t.text) }; });
+  return o;
+}
+function renderChecks() {
+  const domains = new Set(MAPS.map(m => targetOf(m.id)?.domain).filter(Boolean));
+  const allDomains = new Set(TARGETS.map(t => t.domain));
+  const priv = MAPS.filter(m => targetOf(m.id)?.private).length;
+  const c = [];
+  c.push(`<span class="check ${MAPS.length >= 3 && MAPS.length <= 5 ? '' : 'warn'}">${MAPS.length} target${MAPS.length === 1 ? '' : 's'} mapped</span>`);
+  c.push(`<span class="check ${domains.size >= Math.min(3, allDomains.size) ? '' : 'warn'}">${domains.size} of ${allDomains.size} domains covered</span>`);
+  if (priv) c.push(`<span class="check">${priv} staff-only target${priv > 1 ? 's' : ''} kept off pupil sheets</span>`);
+  const phases = MAPS.map(m => m.phase);
+  if (new Set(phases).size !== phases.length) c.push('<span class="check warn">Two targets share a phase</span>');
+  $('#checks').innerHTML = c.join('');
+}
+function renderMapEditor() {
+  $('#maps').innerHTML = MAPS.map((m, i) => {
+    const p = PHASE[m.phase], t = targetOf(m.id);
+    return `<div class="m-row" data-i="${i}" style="border-left-color:${p.hex}">
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <select data-f="phase">${PHASES.map(x => `<option value="${x.key}" ${x.key === m.phase ? 'selected' : ''}>${x.num}. ${x.name}</option>`).join('')}</select>
+        <select data-f="id">${TARGETS.map(x => `<option value="${x.id}" ${x.id === m.id ? 'selected' : ''}>${x.id}${x.private ? ' 🔒' : ''}</option>`).join('')}</select>
+        <button class="btn small ghost" data-a="del">Remove</button>
+      </div>
+      <div>
+        <div class="verb">${t ? `<b>${esc(t.id)}</b> ${esc(t.text)}${t.private ? ' <b>· staff only</b>' : ''}` : ''}</div>
+        <div class="grid2"><div><div class="mini">Activity</div><input type="text" data-f="activity" value="${esc(m.activity)}"></div>
+        <div><div class="mini">Pupil wording</div><input type="text" data-f="pupil_text" value="${esc(m.pupil_text)}"></div></div>
+        <div class="grid2"><div><div class="mini">What it looks like</div><input type="text" data-f="look_for" value="${esc(m.look_for)}"></div>
+        <div><div class="mini">Adult prompt</div><input type="text" data-f="prompt" value="${esc(m.prompt)}"></div></div>
+        <div class="mini">Activity tweak (optional)</div><input type="text" data-f="tweak" value="${esc(m.tweak || '')}">
+      </div></div>`;
+  }).join('');
+  $$('#maps .m-row').forEach(row => {
+    const m = MAPS[+row.dataset.i];
+    $$('[data-f]', row).forEach(el => el.onchange = el.oninput = () => {
+      m[el.dataset.f] = el.value;
+      if (el.dataset.f === 'id' || el.dataset.f === 'phase') {
+        if (el.dataset.f === 'phase') m.activity = ACTIVE.phases.find(p => p.key === m.phase)?.title || m.activity;
+        renderMapEditor(); renderChecks();
+      }
+    });
+    $('[data-a=del]', row).onclick = () => { MAPS.splice(+row.dataset.i, 1); renderMapEditor(); renderChecks(); renderOutputs(); };
+  });
+}
+function opts() { return { learner: $('#learner').value.trim(), unit: $('#unit').value.trim() }; }
+
+function renderTeacherMap() {
+  const o = opts();
+  return `<div class="tm"><h2>PLIM target map${o.unit ? ' · ' + esc(o.unit) : ''}</h2>
+    <div class="tm-sub">${o.learner ? 'Learner: <b>' + esc(o.learner) + '</b> · ' : ''}${esc(ACTIVE.title)} · Date: ____________</div>
+    <table><thead><tr><th style="width:96px">Phase</th><th style="width:15%">Activity</th><th>PLIM target</th><th style="width:19%">What it looks like</th><th style="width:17%">Adult prompt</th><th style="width:86px">Evidence</th></tr></thead><tbody>
+    ${MAPS.map(m => { const p = PHASE[m.phase], t = targetOf(m.id) || {}; return `<tr>
+      <td class="ph" style="background:${p.hex}"><img src="${ICONS[p.key]}" alt="">${p.num}. ${p.name}</td>
+      <td>${esc(m.activity)}${m.tweak ? `<span class="tweak">Tweak: ${esc(m.tweak)}</span>` : ''}</td>
+      <td><span class="id">${esc(t.id)}</span> ${esc(t.text)}${t.private ? '<span class="priv">STAFF ONLY</span>' : ''}<br><span style="color:#57534e;font-size:11.5px">Pupil sees: “${esc(m.pupil_text)}”</span></td>
+      <td>${esc(m.look_for)}</td><td>${esc(m.prompt)}</td>
+      <td class="ev"><span><i></i>Seen</span><span><i></i>Partly</span><span><i></i>Not yet</span></td></tr>`; }).join('')}
+    </tbody></table>
+    <div class="tm-sub" style="margin-top:10px">Notes for PLIM review: ____________________________________________________________________________________________</div></div>`;
+}
+function renderTargetCard() {
+  const o = opts(), tg = pupilTargets();
+  return `<div class="tc"><h1>My targets today</h1><div class="tc-sub">${o.learner ? 'Learner: <b>' + esc(o.learner) + '</b> · ' : ''}${esc(ACTIVE.title)}</div>
+    ${MAPS.map(m => { const p = PHASE[m.phase]; return `<div class="tc-row" style="--c:${p.hex};--l:${p.light}"><img src="${ICONS[p.key]}" alt=""><div class="tc-t"><b>${p.num}. ${p.name}</b><span>${esc(tg[m.phase].pupil_text)}</span></div>${FACES_HTML()}</div>`; }).join('')}
+    <div class="tc-sub" style="margin-top:14px">In Review, circle a face for each target.</div></div>`;
+}
+function renderOutputs() {
+  const o = opts();
+  $('#tm-preview').innerHTML = renderTeacherMap();
+  $('#tc-preview').innerHTML = renderTargetCard();
+  $('#tb-preview').innerHTML = renderBoard(ACTIVE, { targets: pupilTargets(), learner: o.learner });
+  if (LESSON && ACTIVE === LESSON) $('#ws-preview').innerHTML = renderWorksheet(LESSON, { targets: pupilTargets(), learner: o.learner });
+}
+function showResults() {
+  $('#results').style.display = 'block';
+  $('#tab-ws').style.display = (LESSON && ACTIVE === LESSON) ? '' : 'none';
+  renderChecks(); renderMapEditor(); renderOutputs();
+  $('#results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+$('#apply-map').onclick = () => { renderChecks(); renderOutputs(); toast('Updated'); };
+$('#add-map').onclick = () => {
+  const free = PHASES.find(p => !MAPS.some(m => m.phase === p.key)); if (!free) { toast('Every phase already has a target'); return; }
+  MAPS.push({ phase: free.key, id: TARGETS[0].id, activity: ACTIVE.phases.find(p => p.key === free.key)?.title || '', look_for: '', prompt: '', pupil_text: 'I can ', tweak: '' });
+  MAPS.sort((a, b) => PHASE[a.phase].num - PHASE[b.phase].num); renderMapEditor(); renderChecks();
+};
+$('#learner').oninput = $('#unit').oninput = () => { if (ACTIVE) renderOutputs(); };
+$$('.out-tab').forEach(b => b.onclick = () => {
+  $$('.out-tab').forEach(x => x.classList.toggle('active', x === b));
+  $$('.out-pane').forEach(x => x.classList.toggle('active', x.dataset.pane === b.dataset.pane));
+});
+$('#clear').onclick = () => {
+  HANDOFF.clear('lesson'); HANDOFF.clear('plim');
+  TARGETS = []; MAPS = []; LESSON = null; ACTIVE = null;
+  $('#plim-text').value = ''; $('#learner').value = ''; $('#unit').value = ''; $('#src-text').value = '';
+  renderTargets(); showLessonIn(); $('#results').style.display = 'none'; $('#gen').classList.remove('show');
+  window.scrollTo({ top: 0, behavior: 'smooth' }); toast('Cleared from this tab');
+};
+
+/* ── Word exports specific to the mapper ── */
+async function docxTeacherMap() {
+  await loadLib('docx');
+  const { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, ImageRun, WidthType, ShadingType, BorderStyle, PageOrientation } = window.docx;
+  const o = opts(), b = { style: BorderStyle.SINGLE, size: 4, color: 'D6D3D1' }, borders = { top: b, bottom: b, left: b, right: b };
+  const T = (text, x = {}) => new TextRun({ text, size: x.size || 19, bold: x.bold, color: x.color, font: 'Arial', italics: x.italic });
+  const cell = (runs, w, x = {}) => new TableCell({ width: { size: w, type: WidthType.DXA }, borders, shading: x.fill ? { type: ShadingType.CLEAR, fill: x.fill, color: 'auto' } : undefined, margins: { top: 80, bottom: 80, left: 100, right: 100 }, children: (Array.isArray(runs[0]) ? runs : [runs]).map(r => new Paragraph({ children: r })) });
+  const widths = [1500, 2300, 3900, 2700, 2500, 1500];
+  const head = new TableRow({ tableHeader: true, children: ['Phase', 'Activity', 'PLIM target', 'What it looks like', 'Adult prompt', 'Evidence'].map((h, i) => cell([T(h, { bold: true, color: 'FAF6EF' })], widths[i], { fill: '1C1917' })) });
+  const rows = MAPS.map(m => {
+    const p = PHASE[m.phase], t = targetOf(m.id) || {};
+    return new TableRow({ cantSplit: true, children: [
+      cell([[new ImageRun({ type: 'png', data: dataURLtoBytes(ICONS[p.key]), transformation: { width: 28, height: 28 } })], [T(`${p.num}. ${p.name}`, { bold: true, color: 'FFFFFF' })]], widths[0], { fill: p.hex.slice(1) }),
+      cell(m.tweak ? [[T(m.activity)], [T('Tweak: ' + m.tweak, { color: '4A7C59', bold: true })]] : [T(m.activity)], widths[1]),
+      cell([[T(t.id + ' ', { bold: true, color: 'C1440E' }), T(t.text || ''), T(t.private ? '  STAFF ONLY' : '', { bold: true })], [T('Pupil sees: “' + m.pupil_text + '”', { size: 17, color: '57534E', italic: true })]], widths[2]),
+      cell([T(m.look_for)], widths[3]), cell([T(m.prompt)], widths[4]),
+      cell([[T('☐ Seen')], [T('☐ Partly')], [T('☐ Not yet')]], widths[5])
+    ] });
+  });
+  const doc = new Document({ sections: [{ properties: { page: { size: { orientation: PageOrientation.LANDSCAPE, width: 11906, height: 16838 }, margin: { top: 720, bottom: 720, left: 720, right: 720 } } }, children: [
+    new Paragraph({ children: [T('PLIM target map' + (o.unit ? ' · ' + o.unit : ''), { size: 34, bold: true })] }),
+    new Paragraph({ spacing: { after: 160 }, children: [T((o.learner ? 'Learner: ' + o.learner + '   ·   ' : '') + ACTIVE.title + '   ·   Date: ____________', { color: '57534E', size: 21 })] }),
+    new Table({ width: { size: widths.reduce((a, b) => a + b), type: WidthType.DXA }, columnWidths: widths, rows: [head, ...rows] }),
+    new Paragraph({ spacing: { before: 240 }, children: [T('Notes for PLIM review:', { bold: true })] }),
+    ...[1, 2, 3].map(() => new Paragraph({ spacing: { before: 300 }, border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: 'A8A29E', space: 1 } }, children: [] }))
+  ] }] });
+  return Packer.toBlob(doc);
+}
+async function docxTargetCard() {
+  await loadLib('docx');
+  const { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, ImageRun, WidthType, ShadingType, BorderStyle, VerticalAlign } = window.docx;
+  const o = opts(), tg = pupilTargets();
+  const T = (text, x = {}) => new TextRun({ text, size: x.size || 24, bold: x.bold, color: x.color, font: 'Arial' });
+  const img = (url, w) => new ImageRun({ type: 'png', data: dataURLtoBytes(url), transformation: { width: w, height: w } });
+  const faces = ['yes', 'partly', 'notyet'].map(k => drawFace(k, 120));
+  const W = 10466, widths = [1200, 6566, 2700];
+  const rows = MAPS.map(m => {
+    const p = PHASE[m.phase], c = p.hex.slice(1), l = p.light.slice(1);
+    const bd = { style: BorderStyle.SINGLE, size: 12, color: c }, borders = { top: bd, bottom: bd, left: bd, right: bd };
+    const cell = (kids, w) => new TableCell({ width: { size: w, type: WidthType.DXA }, borders, verticalAlign: VerticalAlign.CENTER, shading: { type: ShadingType.CLEAR, fill: l, color: 'auto' }, margins: { top: 120, bottom: 120, left: 120, right: 120 }, children: kids });
+    return new TableRow({ cantSplit: true, children: [
+      cell([new Paragraph({ children: [img(ICONS[p.key], 52)] })], widths[0]),
+      cell([new Paragraph({ children: [T(`${p.num}. ${p.name}`.toUpperCase(), { size: 18, bold: true, color: '44403C' })] }), new Paragraph({ children: [T(tg[m.phase].pupil_text, { size: 32, bold: true })] })], widths[1]),
+      cell([new Paragraph({ children: faces.flatMap((f, i) => [img(f, 38), T(i < 2 ? '  ' : '')]) })], widths[2])
+    ] });
+  });
+  const spaced = []; rows.forEach((r, i) => { spaced.push(r); });
+  const doc = new Document({ sections: [{ properties: { page: { size: { width: 11906, height: 16838 }, margin: { top: 720, bottom: 720, left: 720, right: 720 } } }, children: [
+    new Paragraph({ children: [T('My targets today', { size: 44, bold: true })] }),
+    new Paragraph({ spacing: { after: 200 }, children: [T((o.learner ? 'Learner: ' + o.learner + '   ·   ' : '') + ACTIVE.title, { color: '57534E', size: 22 })] }),
+    new Table({ width: { size: W, type: WidthType.DXA }, columnWidths: widths, rows: spaced }),
+    new Paragraph({ spacing: { before: 200 }, children: [T('In Review, circle a face for each target.', { color: '57534E', size: 22 })] })
+  ] }] });
+  return Packer.toBlob(doc);
+}
+
+$$('[data-dl]').forEach(b => b.onclick = async () => {
+  const k = b.dataset.dl, o = opts(), name = (o.learner ? slug(o.learner) + '-' : '') + slug(ACTIVE.title);
+  const label = b.innerHTML; b.disabled = true; b.innerHTML = 'Building…';
+  try {
+    if (k === 'docx-tm') downloadBlob(await docxTeacherMap(), name + '-plim-map.docx');
+    if (k === 'docx-tc') downloadBlob(await docxTargetCard(), name + '-my-targets.docx');
+    if (k === 'docx-ws') downloadBlob(await buildDocx(LESSON, { targets: pupilTargets(), learner: o.learner }), name + '-personal-worksheet.docx');
+    if (k === 'pptx-tb') downloadBlob(await buildPptx(ACTIVE, { boardOnly: true, targets: pupilTargets(), learner: o.learner }), name + '-task-board.pptx');
+    if (k === 'print-tm') printHTML(renderTeacherMap(), 'PLIM target map', true);
+    if (k === 'print-tc') printHTML(renderTargetCard(), 'My targets', false);
+    if (k === 'print-tb') printHTML(renderBoard(ACTIVE, { targets: pupilTargets(), learner: o.learner }), 'Task board', true);
+    if (k === 'print-ws') printHTML(renderWorksheet(LESSON, { targets: pupilTargets(), learner: o.learner }), 'Worksheet', false);
+  } catch (e) { toast('Could not build the file: ' + e.message); }
+  b.disabled = false; b.innerHTML = label;
+});
+</script>
+</body>
+</html>
